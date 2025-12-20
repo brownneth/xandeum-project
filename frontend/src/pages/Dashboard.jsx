@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Server, Database, CheckCircle, Activity, ArrowRight } from 'lucide-react';
 import { WorldMap } from '../components/maps/WorldMap';
 import { StatCard } from '../components/common/StatCard';
 import { NetworkHistoryChart } from '../components/charts/NetworkHistoryChart';
 
 export const Dashboard = ({ stats, nodes, history, isDark, onNavigate, mapFocus }) => {
+  const mapSectionRef = useRef(null);
+
+  useEffect(() => {
+    if (mapFocus && mapSectionRef.current) {
+      setTimeout(() => {
+        mapSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [mapFocus]);
+
   return (
     <div className="space-y-6 animate-fade-in">
-      
+
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-light mb-1">Network Overview</h1>
@@ -43,10 +53,10 @@ export const Dashboard = ({ stats, nodes, history, isDark, onNavigate, mapFocus 
         <NetworkHistoryChart data={history} isDark={isDark} />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8" ref={mapSectionRef}>
         <h3 className="text-lg font-normal mb-4">Global Node Distribution</h3>
         <div className={`w-full h-[500px] border rounded-lg overflow-hidden relative ${isDark ? 'bg-[#161616] border-[#393939]' : 'bg-white border-gray-200'}`}>
-           {/* zoom effect */}
+           
            <WorldMap nodes={nodes} isDark={isDark} focusLocation={mapFocus} />
         </div>
       </div>
