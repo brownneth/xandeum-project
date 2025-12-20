@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { Plus, Minus } from 'lucide-react';
 
 const worldUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
-export const WorldMap = ({ nodes, isDark }) => {
+export const WorldMap = ({ nodes, isDark, focusLocation }) => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
   const validNodes = nodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
 
   const isScanning = nodes.length > 0 && validNodes.length < nodes.length;
+  
+  useEffect(() => {
+    if (focusLocation) {
+      setPosition({
+        coordinates: [focusLocation.lng, focusLocation.lat], // [Longitude, Latitude]
+        zoom: focusLocation.zoom || 4
+      });
+    }
+  }, [focusLocation]);
 
   const handleZoomIn = () => {
     if (position.zoom >= 8) return;
@@ -40,6 +49,7 @@ export const WorldMap = ({ nodes, isDark }) => {
             [-100, -100],
             [900, 700]    
           ]}
+          style={{ transition: 'transform 0.5s ease-out' }}
         >
           <Geographies geography={worldUrl}>
             {({ geographies }) =>
@@ -67,6 +77,7 @@ export const WorldMap = ({ nodes, isDark }) => {
         </ZoomableGroup>
       </ComposableMap>
 
+      {/* Unified Status Indicator */}
       <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-xs px-3 py-2 rounded border border-white/10 pointer-events-none select-none transition-all duration-500">
         <div className="flex items-center gap-2">
 
@@ -82,6 +93,7 @@ export const WorldMap = ({ nodes, isDark }) => {
         </div>
       </div>
 
+      {/* Zoom Controls */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-1">
         <button 
           onClick={handleZoomIn}

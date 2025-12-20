@@ -9,6 +9,7 @@ const App = () => {
   const [activePage, setActivePage] = useState('overview');
   const [isDark, setIsDark] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [mapFocus, setMapFocus] = useState(null);
   
   const { nodes, stats, history, loading, loadMore, hasMore } = useNetworkData();
 
@@ -20,6 +21,17 @@ const App = () => {
   const handleBack = () => {
     setSelectedNode(null);
     setActivePage('nodes');
+  };
+  const handleViewOnMap = (node) => {
+    if (node.geo) {
+      setMapFocus({ 
+        lat: node.geo.lat, 
+        lng: node.geo.lng, 
+        zoom: 4, 
+        id: Date.now() 
+      });
+      setActivePage('overview');
+    }
   };
 
   return (
@@ -36,6 +48,7 @@ const App = () => {
           history={history}
           isDark={isDark} 
           onNavigate={setActivePage} 
+          mapFocus={mapFocus} 
         />
       )}
       
@@ -47,8 +60,7 @@ const App = () => {
           loading={loading} 
           isDark={isDark}
           onRowClick={handleNodeClick}
-          onNavigate={setActivePage}
-          // REMOVED: onSearch prop
+          onNavigate={setActivePage} 
         />
       )}
       
@@ -57,6 +69,7 @@ const App = () => {
           item={selectedNode} 
           onBack={handleBack} 
           isDark={isDark} 
+          onViewOnMap={handleViewOnMap} 
         />
       )}
     </MainLayout>

@@ -13,38 +13,37 @@ import {
   Zap,
   Network,
   ArrowUpRight,
-  ArrowDownLeft
+  ArrowDownLeft,
+  ScanEye
 } from 'lucide-react';
 import { formatRelativeTime, formatBytes, formatUptime, formatNumber } from '../utils/formatters';
 
-export const NodeDetail = ({ item, onBack, isDark }) => {
+export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
   const [activeTab, setActiveTab] = useState('metrics');
   const [copied, setCopied] = useState(false);
 
   if (!item) return null;
 
-  // --- Logic & Helpers ---
-  
-  // 1. Determine Node Type
+
   const isPrivate = item.node_type === 'Private Node' || !item.geo;
   const nodeTypeLabel = item.node_type || (isPrivate ? 'Private Node' : 'Public Node');
 
-  // 2. Storage Calculations
+
   const storageUsed = item.storage_used_bytes || 0;
   const storageTotal = item.storage_committed_bytes || item.storage || 1;
   const storagePercent = Math.min(((storageUsed / storageTotal) * 100), 100);
 
-  // 3. RAM Calculations
+
   const ramUsed = item.ram_used_bytes || 0;
   const ramTotal = item.ram_total_bytes || 0;
   const ramPercent = ramTotal > 0 ? Math.min(((ramUsed / ramTotal) * 100), 100) : 0;
   const showRam = ramTotal > 0;
 
-  // 4. Network Activity
+
   const packetsSent = item.packets_sent || 0;
   const packetsReceived = item.packets_received || 0;
   
-  // 5. Theme Colors
+
   const colors = isDark 
     ? { 
         bg: 'bg-[#161616]', 
@@ -202,7 +201,7 @@ export const NodeDetail = ({ item, onBack, isDark }) => {
                 </div>
             </div>
 
-            {/* Memory Card (Conditionally Rendered) */}
+            {/* Memory Card */}
             {showRam && (
                <div className={`${colors.card} border ${colors.border} p-6 rounded-lg flex flex-col`}>
                   <div className="flex items-center gap-2 mb-6">
@@ -235,11 +234,26 @@ export const NodeDetail = ({ item, onBack, isDark }) => {
                </div>
             )}
 
-            {/* Location Card */}
+            {/* Location Card WITH "VIEW ON MAP" BUTTON */}
             <div className={`${colors.card} border ${colors.border} p-6 rounded-lg relative overflow-hidden`}>
                 <div className="flex items-center gap-2 mb-4 relative z-10">
                     <MapPin size={18} className={isPrivate ? 'text-purple-500' : colors.success} />
                     <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text}`}>Physical Location</h3>
+                    
+                    {!isPrivate && (
+                        <button 
+                          onClick={() => onViewOnMap(item)}
+                          className={`
+                             ml-auto flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium tracking-wide border transition-all
+                             ${isDark 
+                               ? 'border-blue-900 bg-blue-900/10 text-blue-400 hover:bg-blue-900/30' 
+                               : 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'}
+                          `}
+                        >
+                           <ScanEye size={12} />
+                           VIEW ON MAP
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex-1 flex flex-col justify-center relative z-10">
@@ -280,7 +294,7 @@ export const NodeDetail = ({ item, onBack, isDark }) => {
                         <div className={`text-xs ${colors.subText} uppercase tracking-wider mb-1`}>Packets Sent</div>
                         <div className={`text-2xl font-light ${colors.text} flex items-center gap-2`}>
                            {formatNumber(packetsSent)}
-                           {/* UPDATED: Explicit top-right arrow icon */}
+
                            <ArrowUpRight size={16} className="text-blue-500 opacity-70"/>
                         </div>
                     </div>
@@ -288,7 +302,7 @@ export const NodeDetail = ({ item, onBack, isDark }) => {
                         <div className={`text-xs ${colors.subText} uppercase tracking-wider mb-1`}>Packets Rcvd</div>
                         <div className={`text-2xl font-light ${colors.text} flex items-center gap-2`}>
                            {formatNumber(packetsReceived)}
-                           {/* UPDATED: Explicit bottom-left arrow icon */}
+
                            <ArrowDownLeft size={16} className="text-green-500 opacity-70"/>
                         </div>
                     </div>
@@ -353,7 +367,7 @@ export const NodeDetail = ({ item, onBack, isDark }) => {
                    ) : (
                       <div className="flex justify-between py-2 border-b border-gray-800">
                           <span className={colors.subText}>Host System</span>
-                          {/* UPDATED: Clearer UX text */}
+
                           <span className={`font-mono text-xs italic ${colors.subText}`}>Not available</span>
                       </div>
                    )}

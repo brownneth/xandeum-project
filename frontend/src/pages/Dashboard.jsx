@@ -1,10 +1,10 @@
 import React from 'react';
-import { Server, Database, CheckCircle, Activity, ArrowRight, Zap } from 'lucide-react';
+import { Server, Database, CheckCircle, Activity, ArrowRight } from 'lucide-react';
 import { WorldMap } from '../components/maps/WorldMap';
 import { StatCard } from '../components/common/StatCard';
 import { NetworkHistoryChart } from '../components/charts/NetworkHistoryChart';
 
-export const Dashboard = ({ stats, nodes, history, isDark, onNavigate }) => {
+export const Dashboard = ({ stats, nodes, history, isDark, onNavigate, mapFocus }) => {
   return (
     <div className="space-y-6 animate-fade-in">
       
@@ -32,7 +32,7 @@ export const Dashboard = ({ stats, nodes, history, isDark, onNavigate }) => {
         <StatCard label="Total Nodes" value={stats.totalNodes} isDark={isDark} icon={Server} />
         <StatCard label="Active Nodes" value={stats.onlineNodes} status="healthy" subLabel={`${stats.networkHealth.toFixed(1)}% Health`} isDark={isDark} icon={CheckCircle} />
         <StatCard label="Total Storage" value={stats.totalStorage} isDark={isDark} icon={Database} />
-        <StatCard label="Avg. Latency" value="42 ms" subLabel="Global Average" isDark={isDark} icon={Zap} />
+        <StatCard label="Avg. Latency" value="42 ms" subLabel="Global Average" isDark={isDark} icon={Activity} />
       </div>
 
       <div className="mt-8">
@@ -46,7 +46,8 @@ export const Dashboard = ({ stats, nodes, history, isDark, onNavigate }) => {
       <div className="mt-8">
         <h3 className="text-lg font-normal mb-4">Global Node Distribution</h3>
         <div className={`w-full h-[500px] border rounded-lg overflow-hidden relative ${isDark ? 'bg-[#161616] border-[#393939]' : 'bg-white border-gray-200'}`}>
-           <WorldMap nodes={nodes} isDark={isDark} />
+           {/* zoom effect */}
+           <WorldMap nodes={nodes} isDark={isDark} focusLocation={mapFocus} />
         </div>
       </div>
     </div>
