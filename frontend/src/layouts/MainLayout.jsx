@@ -66,12 +66,12 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
       {/* ABOUT MODAL OVERLAY */}
       {isAboutOpen && (
         <div 
-            // 1. CLICK OUTSIDE: Clicking this background closes the modal
+        
             onClick={() => setIsAboutOpen(false)}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4 cursor-pointer"
         >
             <div 
-                // 2. STOP PROPAGATION: Clicking inside the card does NOT close it
+
                 onClick={(e) => e.stopPropagation()}
                 className={`relative w-full max-w-md rounded-lg shadow-2xl p-6 border cursor-default ${isDark ? 'bg-[#262626] border-[#393939]' : 'bg-white border-gray-200'}`}
             >
@@ -89,7 +89,7 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
                 </h2>
 
                 <p className={`text-sm mb-4 leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {/* 3. UPDATED TEXT */}
+                  
                     XPLORER is a network monitor for the Xandeum Provider Node (pNode) storage layer. It visualizes real-time telemetry, global distribution, and capacity growth of the decentralized network.
                 </p>
 
@@ -116,7 +116,9 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
                         Close
                     </button>
                     <a 
-                      href="#" 
+                      href="https://github.com/brownneth/xandeum-project"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center gap-2 px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                     >
                         Documentation
