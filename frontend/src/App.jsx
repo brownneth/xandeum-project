@@ -12,15 +12,22 @@ const App = () => {
   const [mapFocus, setMapFocus] = useState(null);
   
   const { nodes, stats, history, loading, loadMore, hasMore } = useNetworkData();
+  const handleManualNavigation = (page) => {
+    setMapFocus(null); 
+    setActivePage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleNodeClick = (node) => {
     setSelectedNode(node);
     setActivePage('detail');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleBack = () => {
+  const handleBackToExplorer = () => {
     setSelectedNode(null);
     setActivePage('nodes');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleViewOnMap = (node) => {
     if (node.geo) {
@@ -37,7 +44,7 @@ const App = () => {
   return (
     <MainLayout 
       activeView={activePage} 
-      onViewChange={setActivePage} 
+      onViewChange={handleManualNavigation} 
       isDark={isDark} 
       toggleTheme={() => setIsDark(!isDark)}
     >
@@ -47,7 +54,7 @@ const App = () => {
           nodes={nodes} 
           history={history}
           isDark={isDark} 
-          onNavigate={setActivePage} 
+          onNavigate={handleManualNavigation} 
           mapFocus={mapFocus} 
         />
       )}
@@ -60,14 +67,14 @@ const App = () => {
           loading={loading} 
           isDark={isDark}
           onRowClick={handleNodeClick}
-          onNavigate={setActivePage} 
+          onNavigate={handleManualNavigation}
         />
       )}
       
       {activePage === 'detail' && selectedNode && (
         <NodeDetail 
           item={selectedNode} 
-          onBack={handleBack} 
+          onBack={handleBackToExplorer} 
           isDark={isDark} 
           onViewOnMap={handleViewOnMap} 
         />
