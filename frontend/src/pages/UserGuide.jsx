@@ -1,15 +1,26 @@
 import React from 'react';
-import { ArrowLeft, BookOpen, Shield, Database, Activity, Map, Search } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertTriangle, Shield, Globe, HardDrive, Activity, Wifi } from 'lucide-react';
 
 export const UserGuide = ({ onBack, isDark }) => {
   const theme = isDark 
-    ? { bg: 'bg-[#161616]', text: 'text-[#f4f4f4]', card: 'bg-[#262626]', border: 'border-[#393939]', accent: 'text-blue-400' }
-    : { bg: 'bg-[#f4f4f4]', text: 'text-[#161616]', card: 'bg-white', border: 'border-gray-200', accent: 'text-blue-600' };
+    ? { 
+        bg: 'bg-[#161616]', text: 'text-[#f4f4f4]', 
+        card: 'bg-[#262626]', border: 'border-[#393939]', 
+        subText: 'text-gray-400',
+        code: 'bg-[#161616] border-[#333]',
+        success: 'text-[#42be65]', critical: 'text-[#fa4d56]', warn: 'text-[#f1c21b]'
+      }
+    : { 
+        bg: 'bg-[#f4f4f4]', text: 'text-[#161616]', 
+        card: 'bg-white', border: 'border-gray-200', 
+        subText: 'text-gray-600',
+        code: 'bg-gray-100 border-gray-300',
+        success: 'text-[#24a148]', critical: 'text-[#da1e28]', warn: 'text-[#b28600]'
+      };
 
   return (
-    <div className={`animate-fade-in max-w-4xl mx-auto pb-12 ${theme.text}`}>
-      
-      <div className="mb-8 pt-4">
+    <div className={`animate-fade-in max-w-5xl mx-auto pb-12 ${theme.text}`}>
+      <div className="mb-10 pt-4">
         <button 
           onClick={onBack} 
           className={`flex items-center gap-2 px-4 py-2 text-xs font-normal rounded-lg transition-all border mb-6 ${isDark ? 'border-transparent hover:bg-[#353535]' : 'border-transparent hover:bg-gray-200'}`}
@@ -17,128 +28,149 @@ export const UserGuide = ({ onBack, isDark }) => {
           <ArrowLeft size={14} />
           Back to Dashboard
         </button>
-        <h1 className="text-4xl font-light mb-2">Operator Manual</h1>
-        <p className="text-xl opacity-60 font-light">Technical documentation for XPLORER and the v0.8 Reinheim Network.</p>
+        <h1 className="text-3xl font-light mb-2">Operator Manual</h1>
+        <p className="text-lg opacity-60 font-light">Troubleshooting and diagnostics for the v0.8 Reinheim Network.</p>
       </div>
 
       <div className="space-y-12">
 
         <section>
           <div className="flex items-center gap-3 mb-4">
-            <Activity className={theme.accent} size={24} />
-            <h2 className="text-2xl font-normal">1. Network Specifications</h2>
-          </div>
-          <div className={`p-6 rounded-lg border ${theme.card} ${theme.border} space-y-4`}>
-            <p className="leading-relaxed opacity-80">
-              XPLORER is calibrated for the <strong>South Era (v0.8 Reinheim)</strong> release of the Xandeum network. This version introduces critical storage layer capabilities that this dashboard monitors.
-            </p>
-            <div className="pl-4 border-l-2 border-blue-500 space-y-2">
-              <h3 className="font-medium">Protocol Compliance</h3>
-              <p className="text-sm opacity-70">
-                Nodes displayed on this dashboard are validated against the v0.8 spec. This ensures they support <strong>directory tree name searching</strong> via glob patterns (e.g., <code>*.txt</code> or <code>financials200?.*</code>).
-              </p>
-              <p className="text-sm opacity-70">
-                The dashboard confirms that a node can accept the <code>find</code> operation and perform recursive subdirectory traversal, which is the primary feature advancement of the Reinheim release.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="flex items-center gap-3 mb-4">
-            <Map className={theme.accent} size={24} />
-            <h2 className="text-2xl font-normal">2. Geospatial Monitoring</h2>
-          </div>
-          <div className={`p-6 rounded-lg border ${theme.card} ${theme.border} space-y-6`}>
-            <div>
-              <h3 className="text-lg font-medium mb-2">Understanding Node Status</h3>
-              <ul className="space-y-3 text-sm">
-                <li className="flex gap-3">
-                  <span className="w-3 h-3 rounded-full bg-green-500 mt-1 shrink-0"></span>
-                  <div>
-                    <strong className="block">Active (Public)</strong>
-                    <span className="opacity-70">Node is online, reachable via public IP, and has successfully broadcasted its geospatial coordinates.</span>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="w-3 h-3 rounded-full bg-yellow-400 mt-1 shrink-0"></span>
-                  <div>
-                    <strong className="block">Resolving</strong>
-                    <span className="opacity-70">Node is online but location data is currently being triangulated or is pending DHT propagation.</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            
-            <div className={`p-4 rounded border ${isDark ? 'bg-[#1a1a1a] border-[#333]' : 'bg-gray-50 border-gray-200'}`}>
-              <div className="flex items-center gap-2 mb-2 font-mono text-xs uppercase tracking-wider opacity-50">Feature Focus</div>
-              <h4 className="font-medium mb-1">View on Map</h4>
-              <p className="text-sm opacity-70">
-                In the Node Detail view, clicking <strong>[SCAN EYE] VIEW ON MAP</strong> triggers the global viewport to fly to the node's exact coordinates (Zoom Level 4). This allows operators to visually inspect regional redundancy and neighbor density.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="flex items-center gap-3 mb-4">
-            <Database className={theme.accent} size={24} />
-            <h2 className="text-2xl font-normal">3. Telemetry & Resources</h2>
+            <CheckCircle className={theme.success} size={20} />
+            <h2 className="text-xl font-normal">1. Verifying Node Compliance</h2>
           </div>
           <div className={`p-6 rounded-lg border ${theme.card} ${theme.border}`}>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="font-medium mb-3 border-b pb-2 border-gray-700">Storage Metrics</h3>
-                <ul className="space-y-4 text-sm">
-                  <li>
-                    <strong className="block text-blue-400">Committed Capacity</strong>
-                    <span className="opacity-70">The total disk space a pNode has cryptographically pledged to the network. This is the "max capacity" visible to the chain.</span>
-                  </li>
-                  <li>
-                    <strong className="block text-green-400">Used Storage</strong>
-                    <span className="opacity-70">Actual data shards currently residing on the disk. High utilization (&gt;90%) indicates a need for capacity expansion.</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="font-medium mb-3 border-b pb-2 border-gray-700">Network Activity</h3>
-                <ul className="space-y-4 text-sm">
-                  <li>
-                    <strong className="block">Packets Sent/Received</strong>
-                    <span className="opacity-70">Real-time counter of ingress/egress messages. A stagnant counter on an "Online" node may indicate a firewall or configuration issue blocking gossip traffic.</span>
-                  </li>
-                  <li>
-                    <strong className="block">Latency (RTT)</strong>
-                    <span className="opacity-70">Average round-trip time to the nearest peer. Optimal performance for v0.8 is &lt;100ms.</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="flex items-center gap-3 mb-4">
-            <Shield className={theme.accent} size={24} />
-            <h2 className="text-2xl font-normal">4. Privacy & Anonymity</h2>
-          </div>
-          <div className={`p-6 rounded-lg border ${theme.card} ${theme.border}`}>
-            <p className="mb-4 text-sm opacity-80">
-              XPLORER respects the privacy flags set in the pNode configuration.
-            </p>
-            <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-full ${isDark ? 'bg-purple-900/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>
-                <Shield size={20} />
-              </div>
-              <div>
-                <h3 className="font-medium">Private Node Shielding</h3>
-                <p className="text-sm opacity-70 mt-1">
-                  If a node is flagged as <code>Private</code> or detects a non-public IP range, XPLORER automatically masks its geospatial data. 
-                  The map visualization is disabled for these nodes, and their detail view shows a "Location Data Hidden" state to prevent physical triangulation.
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex-1">
+                <p className={`mb-4 ${theme.subText}`}>
+                  To participate in the current South Era, your node must be synchronized with the <strong>v0.8 Reinheim</strong> update to support glob pattern searches.
                 </p>
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                        <span className="w-20 font-medium">Check:</span>
+                        <span>Configuration Tab &rarr; Protocol</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                        <span className="w-20 font-medium">Target:</span>
+                        <code className={`px-2 py-0.5 rounded text-xs font-mono border ${theme.code} ${theme.success}`}>v0.8 (Reinheim)</code>
+                    </div>
+                </div>
+              </div>
+              <div className={`p-4 rounded border w-full md:w-1/3 text-sm ${isDark ? 'bg-blue-900/10 border-blue-900/30 text-blue-200' : 'bg-blue-50 border-blue-100 text-blue-800'}`}>
+                <strong className="block mb-1">Why it matters:</strong>
+                Nodes on older versions cannot process the new recursive <code>find</code> operations and may be penalized by the network.
               </div>
             </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <Activity className={theme.success} size={20} />
+            <h2 className="text-xl font-normal">2. Reading Your Telemetry</h2>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className={`p-6 rounded-lg border ${theme.card} ${theme.border} flex flex-col`}>
+              <div className="flex items-center gap-2 mb-4 text-blue-400">
+                <HardDrive size={18} />
+                <h3 className="font-medium text-sm uppercase tracking-wide">Storage Load</h3>
+              </div>
+              <p className={`text-sm mb-4 flex-1 ${theme.subText}`}>
+                <strong>Committed</strong> is your pledge. <strong>Used</strong> is the actual client data load.
+              </p>
+              <div className="space-y-2 text-sm font-mono border-t pt-4 border-dashed border-gray-700">
+                <div className={`flex justify-between ${theme.success}`}>
+                  <span>&lt; 80%</span>
+                  <span>Healthy</span>
+                </div>
+                <div className={`flex justify-between ${theme.critical}`}>
+                  <span>&gt; 90%</span>
+                  <span>Critical</span>
+                </div>
+                <div className="mt-2 text-xs opacity-60">
+                  Action: Add physical drives if Critical.
+                </div>
+              </div>
+            </div>
+            <div className={`p-6 rounded-lg border ${theme.card} ${theme.border} flex flex-col`}>
+              <div className="flex items-center gap-2 mb-4 text-purple-400">
+                <Activity size={18} />
+                <h3 className="font-medium text-sm uppercase tracking-wide">Packet Flow</h3>
+              </div>
+              <p className={`text-sm mb-4 flex-1 ${theme.subText}`}>
+                Ingress/Egress gossip traffic. Validates connectivity.
+              </p>
+              <div className="space-y-2 text-sm font-mono border-t pt-4 border-dashed border-gray-700">
+                <div className={`flex justify-between ${theme.success}`}>
+                  <span>Rising</span>
+                  <span>Connected</span>
+                </div>
+                <div className={`flex justify-between ${theme.critical}`}>
+                  <span>0 Rcvd</span>
+                  <span>Blocked</span>
+                </div>
+                <div className="mt-2 text-xs opacity-60">
+                  Action: Check Firewall/Ports if 0.
+                </div>
+              </div>
+            </div>
+            <div className={`p-6 rounded-lg border ${theme.card} ${theme.border} flex flex-col`}>
+              <div className="flex items-center gap-2 mb-4 text-orange-400">
+                <Wifi size={18} />
+                <h3 className="font-medium text-sm uppercase tracking-wide">Latency (RTT)</h3>
+              </div>
+              <p className={`text-sm mb-4 flex-1 ${theme.subText}`}>
+                Round-trip time to nearest peers.
+              </p>
+              <div className="space-y-2 text-sm font-mono border-t pt-4 border-dashed border-gray-700">
+                <div className={`flex justify-between ${theme.success}`}>
+                  <span>&lt; 100ms</span>
+                  <span>Optimal</span>
+                </div>
+                <div className={`flex justify-between ${theme.warn}`}>
+                  <span>&gt; 300ms</span>
+                  <span>Lagging</span>
+                </div>
+                <div className="mt-2 text-xs opacity-60">
+                  Action: Check internet stability.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <Shield className={theme.success} size={20} />
+            <h2 className="text-xl font-normal">3. Privacy Configuration</h2>
+          </div>
+          <div className={`grid md:grid-cols-2 gap-6`}>
+             <div className={`p-6 rounded-lg border flex items-start gap-4 ${isDark ? 'bg-blue-900/10 border-blue-900/30' : 'bg-blue-50 border-blue-100'}`}>
+                <Globe className="text-blue-500 shrink-0" size={24} />
+                <div>
+                   <h3 className="font-medium mb-1 text-blue-400">Public Node</h3>
+                   <p className={`text-sm ${theme.subText} mb-2`}>
+                     Broadcasting public IP and geospatial data.
+                   </p>
+                   <div className="text-xs font-mono opacity-70">
+                     Feature: "View on Map" Enabled
+                   </div>
+                </div>
+             </div>
+             <div className={`p-6 rounded-lg border flex items-start gap-4 ${isDark ? 'bg-purple-900/10 border-purple-900/30' : 'bg-purple-50 border-purple-100'}`}>
+                <Shield className="text-purple-500 shrink-0" size={24} />
+                <div>
+                   <h3 className="font-medium mb-1 text-purple-400">Private Node</h3>
+                   <p className={`text-sm ${theme.subText} mb-2`}>
+                     Masked IP. Geolocation disabled for anonymity.
+                   </p>
+                   <div className="text-xs font-mono opacity-70">
+                     Feature: "Location Hidden" Badge
+                   </div>
+                </div>
+             </div>
+
           </div>
         </section>
 
