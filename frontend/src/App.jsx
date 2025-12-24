@@ -4,6 +4,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { NodeExplorer } from './pages/NodeExplorer';
 import { NodeDetail } from './pages/NodeDetail';
+import { UserGuide } from './pages/UserGuide'; 
 
 const App = () => {
   const [activePage, setActivePage] = useState('overview');
@@ -12,6 +13,7 @@ const App = () => {
   const [mapFocus, setMapFocus] = useState(null);
   
   const { nodes, stats, history, loading, loadMore, hasMore } = useNetworkData();
+
   const handleManualNavigation = (page) => {
     setMapFocus(null); 
     setActivePage(page);
@@ -29,6 +31,11 @@ const App = () => {
     setActivePage('nodes');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  const handleBackToDashboard = () => {
+    setActivePage('overview');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleViewOnMap = (node) => {
     if (node.geo) {
       setMapFocus({ 
@@ -67,7 +74,7 @@ const App = () => {
           loading={loading} 
           isDark={isDark}
           onRowClick={handleNodeClick}
-          onNavigate={handleManualNavigation}
+          onNavigate={handleManualNavigation} 
         />
       )}
       
@@ -77,6 +84,12 @@ const App = () => {
           onBack={handleBackToExplorer} 
           isDark={isDark} 
           onViewOnMap={handleViewOnMap} 
+        />
+      )}
+      {activePage === 'guide' && (
+        <UserGuide 
+          onBack={handleBackToDashboard} 
+          isDark={isDark}
         />
       )}
     </MainLayout>

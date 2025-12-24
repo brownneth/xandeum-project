@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Activity, Sun, Moon, HelpCircle, X, ExternalLink } from 'lucide-react';
-
-export const MainLayout = ({ children, isDark, toggleTheme }) => {
+import { Activity, Sun, Moon, HelpCircle, X, BookOpen } from 'lucide-react';
+export const MainLayout = ({ children, isDark, toggleTheme, onViewChange }) => {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   const theme = isDark ? {
@@ -14,20 +13,24 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
     footerBg: 'bg-[#e0e0e0]', footerText: 'text-[#525252]'
   };
 
+  const handleOpenGuide = () => {
+    setIsAboutOpen(false); 
+    if (onViewChange) onViewChange('guide'); 
+  };
+
   return (
     <div className={`flex flex-col h-screen w-full font-sans overflow-hidden ${theme.bg} ${theme.text} ${isDark ? 'dark' : ''}`}>
       
-      {/* HEADER */}
+
       <header className={`h-14 flex items-center px-6 shrink-0 z-50 border-b ${theme.border} ${theme.headerBg} ${theme.headerText} transition-colors duration-300`}>
-        {/* LOGO */}
-        <div className="font-semibold tracking-wide flex items-center gap-2">
+        <div className="font-semibold tracking-wide flex items-center gap-2 cursor-pointer" onClick={() => onViewChange && onViewChange('overview')}>
           <Activity size={20} className="text-blue-600" />
           <span className="text-lg">XPLORER <span className="font-normal opacity-50 text-sm ml-2 hidden md:inline">Xandeum pNode Explorer</span></span>
         </div>
 
-        {/* ACTIONS */}
+
         <div className="ml-auto flex items-center gap-2">
-           {/* ABOUT BUTTON */}
+
           <button 
             onClick={() => setIsAboutOpen(true)}
             className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-[#353535] text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-black'}`}
@@ -36,7 +39,7 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
             <HelpCircle size={18} />
           </button>
 
-          {/* THEME TOGGLE */}
+
           <button 
             onClick={toggleTheme} 
             className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-[#353535]' : 'hover:bg-gray-100'}`}
@@ -46,16 +49,16 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
         </div>
       </header>
 
-      {/* MAIN CONTENT AREA */}
+
       <main className={`flex-1 overflow-y-auto p-4 md:p-8 ${theme.bg}`}>
         <div className="max-w-[1600px] mx-auto min-h-full pb-10">{children}</div>
       </main>
 
-      {/* SYSTEM FOOTER */}
+
       <footer className={`h-8 border-t flex items-center justify-between px-6 text-xs font-mono select-none shrink-0 ${theme.border} ${theme.footerBg} ${theme.footerText}`}>
         <div className="flex gap-4">
-           <span>v1.0.0-beta</span>
-           <span className="opacity-50">Build 2025.12.19</span>
+           <span>v1.1.0-beta</span>
+           <span className="opacity-50">Build 2025.12.24</span>
         </div>
         <div className="flex items-center gap-2">
            <span className="w-2 h-2 rounded-full bg-green-500"></span>
@@ -63,10 +66,10 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
         </div>
       </footer>
 
-      {/* ABOUT MODAL OVERLAY */}
+
       {isAboutOpen && (
         <div 
-        
+
             onClick={() => setIsAboutOpen(false)}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4 cursor-pointer"
         >
@@ -89,14 +92,14 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
                 </h2>
 
                 <p className={`text-sm mb-4 leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  
+
                     XPLORER is a network monitor for the Xandeum Provider Node (pNode) storage layer. It visualizes real-time telemetry, global distribution, and capacity growth of the decentralized network.
                 </p>
 
                 <div className={`p-4 rounded mb-6 text-xs font-mono ${isDark ? 'bg-[#161616] text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
                     <div className="flex justify-between mb-1">
                         <span>Version:</span>
-                        <span>1.0.0 (Beta)</span>
+                        <span>1.1.0 (Beta)</span>
                     </div>
                     <div className="flex justify-between mb-1">
                         <span>Backend:</span>
@@ -115,15 +118,13 @@ export const MainLayout = ({ children, isDark, toggleTheme }) => {
                     >
                         Close
                     </button>
-                    <a 
-                      href="https://github.com/brownneth/xandeum-project"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button 
+                      onClick={handleOpenGuide}
                       className="flex items-center gap-2 px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                     >
-                        Documentation
-                        <ExternalLink size={14} />
-                    </a>
+                        <BookOpen size={14} />
+                        Operator Manual
+                    </button>
                 </div>
             </div>
         </div>

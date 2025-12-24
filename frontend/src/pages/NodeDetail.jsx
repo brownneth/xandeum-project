@@ -14,7 +14,7 @@ import {
   Network,
   ArrowUpRight,
   ArrowDownLeft,
-  ScanEye
+  ScanEye 
 } from 'lucide-react';
 import { formatRelativeTime, formatBytes, formatUptime, formatNumber } from '../utils/formatters';
 
@@ -76,12 +76,12 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
     const isOnline = status === 'ONLINE';
     if (isDark) {
       return isOnline 
-        ? 'text-green-400 border-green-900 bg-green-900/20' 
-        : 'text-red-400 border-red-900 bg-red-900/20';
+        ? 'text-green-300 bg-green-900/40' 
+        : 'text-red-300 bg-red-900/40';
     } else {
       return isOnline 
-        ? 'text-green-800 border-green-200 bg-green-100' 
-        : 'text-red-800 border-red-200 bg-red-100';
+        ? 'text-green-800 bg-green-100' 
+        : 'text-red-800 bg-red-100';
     }
   };
 
@@ -114,14 +114,16 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                   {item.fullAddress}
                 </h2>
                 
-                <span className={`text-[10px] px-2 py-0.5 border rounded font-bold uppercase tracking-wider ${getStatusColor(item.status)}`}>
+                {/* FLAT STATUS TAG */}
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${getStatusColor(item.status)}`}>
                   {item.status}
                 </span>
 
-                <span className={`text-[10px] px-2 py-0.5 border rounded font-bold uppercase tracking-wider flex items-center gap-1 ${
+                {/* FLAT TYPE TAG */}
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-1 ${
                   isPrivate
-                    ? (isDark ? 'text-purple-400 border-purple-900 bg-purple-900/20' : 'text-purple-800 border-purple-200 bg-purple-100')
-                    : (isDark ? 'text-blue-400 border-blue-900 bg-blue-900/20' : 'text-blue-800 border-blue-200 bg-blue-50')
+                    ? (isDark ? 'text-purple-300 bg-purple-900/40' : 'text-purple-800 bg-purple-100')
+                    : (isDark ? 'text-blue-300 bg-blue-900/40' : 'text-blue-800 bg-blue-100')
                 }`}>
                   {isPrivate ? <Shield size={10} /> : <Globe size={10} />}
                   {nodeTypeLabel}
@@ -234,24 +236,25 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                </div>
             )}
 
-            {/* Location Card WITH "VIEW ON MAP" BUTTON */}
+            {/* Location Card */}
             <div className={`${colors.card} border ${colors.border} p-6 rounded-lg relative overflow-hidden`}>
                 <div className="flex items-center gap-2 mb-4 relative z-10">
                     <MapPin size={18} className={isPrivate ? 'text-purple-500' : colors.success} />
                     <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text}`}>Physical Location</h3>
                     
+                    {/* UPDATED: "Ghost Link" Style Button */}
                     {!isPrivate && (
                         <button 
                           onClick={() => onViewOnMap(item)}
                           className={`
-                             ml-auto flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium tracking-wide border transition-all
+                             ml-auto flex items-center gap-1.5 text-[10px] font-medium tracking-wide transition-all uppercase
                              ${isDark 
-                               ? 'border-blue-900 bg-blue-900/10 text-blue-400 hover:bg-blue-900/30' 
-                               : 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'}
+                               ? 'text-gray-500 hover:text-blue-400' 
+                               : 'text-gray-400 hover:text-blue-600'}
                           `}
                         >
-                           <ScanEye size={12} />
-                           VIEW ON MAP
+                           <ScanEye size={14} />
+                           View on Map
                         </button>
                     )}
                 </div>
@@ -318,7 +321,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
 
         </div>
       ) : (
-        /* CONFIGURATION TAB CONTENT */
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
            
            <div className={`${colors.card} border ${colors.border} p-6 rounded-lg`}>
