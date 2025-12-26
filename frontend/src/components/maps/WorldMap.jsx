@@ -4,40 +4,47 @@ import { Plus, Minus, X, ArrowRight, Server, Activity } from 'lucide-react';
 
 const worldUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
+const countryCodeMap = {
+  "US": "United States of America",
+  "DE": "Germany",
+  "FR": "France",
+  "GB": "United Kingdom",
+  "IN": "India",
+  "NG": "Nigeria",
+  "SG": "Singapore",
+  "JP": "Japan",
+  "BR": "Brazil",
+  "AU": "Australia",
+  "CA": "Canada",
+  "CN": "China",
+  "RU": "Russia",
+  "ZA": "South Africa"
+};
+
 export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
   const [selectedCountry, setSelectedCountry] = useState(null);
   
-  const validNodes = nodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
-  
+  const validNodes = nodes.filter(n => n.lat && n.lon);
   const isScanning = nodes.length > 0 && validNodes.length < nodes.length;
-
-  const normalize = (str) => (str || "").toLowerCase();
+  
 
   const getStatsForCountry = (geo) => {
-    const countryName = geo.properties.name; 
-    const iso3 = geo.id; 
-    const iso2 = geo.properties.iso_a2; 
-    
+    const mapCountryName = geo.properties.name;
 
     const relevantNodes = nodes.filter(n => {
-        const loc = normalize(n.location);
-        const nameMatch = loc.includes(normalize(countryName));
-        const codeMatch = iso3 && loc.includes(normalize(iso3));
-        
-        return nameMatch || codeMatch;
+        if (!n.country) return false;
+        const mappedName = countryCodeMap[n.country];
+        return mappedName === mapCountryName;
     });
 
-    if (relevantNodes.length === 0) {
-        console.log(`No nodes found for ${countryName}. Check your node.location strings.`);
-        return null;
-    }
+    if (relevantNodes.length === 0) return null;
 
     const totalLatency = relevantNodes.reduce((acc, n) => acc + (n.latency || 0), 0);
     const avgLatency = Math.round(totalLatency / relevantNodes.length);
 
     return {
-        name: countryName,
+        name: mapCountryName,
         count: relevantNodes.length,
         nodes: relevantNodes,
         avgLatency,
@@ -49,7 +56,7 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
     const stats = getStatsForCountry(geo);
     
     if (stats) {
-        console.log("Stats found:", stats);
+
         setSelectedCountry(stats);
     } else {
         setSelectedCountry(null);
@@ -65,9 +72,15 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
     }
   }, [focusLocation]);
 
+  const handleZoomIn = () => {
+    if (position.zoom >= 8) return;
+    setPosition(pos => ({ ...pos, zoom: pos.zoom * 1.2 }));
+  };
 
-
-
+  const handleZoomOut = () => {
+    if (position.zoom <= 1) return;
+    setPosition(pos => ({ ...pos, zoom: pos.zoom / 1.2 }));
+  };
 
   const handleMoveEnd = (position) => {
     setPosition(position);
@@ -91,11 +104,11 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
           <Geographies geography={worldUrl}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const countryName = geo.properties.name;
-                const iso3 = geo.id;
+                const mapCountryName = geo.properties.name;
+                
                 const hasNodes = nodes.some(n => {
-                    const loc = normalize(n.location);
-                    return loc.includes(normalize(countryName)) || (iso3 && loc.includes(normalize(iso3)));
+                    if (!n.country) return false;
+                    return countryCodeMap[n.country] === mapCountryName;
                 });
 
                 return (
@@ -115,14 +128,14 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
                       },
                       pressed: { outline: "none" },
                     }}
-                    title={hasNodes ? "Click to view details" : ""}
+
                   />
                 );
               })
             }
           </Geographies>
           {validNodes.map((node, i) => (
-            <Marker key={`${node.id}-${i}`} coordinates={[node.geo.lng, node.geo.lat]}>
+            <Marker key={`${node.ip_address}-${i}`} coordinates={[node.lon, node.lat]}>
               <circle r={2} fill="#42be65" stroke={isDark ? "#161616" : "#fff"} strokeWidth={0.5} />
             </Marker>
           ))}
@@ -146,18 +159,17 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
 
       <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-10">
         <button 
-          onClick={() => setPosition(p => ({ ...p, zoom: p.zoom * 1.2 }))}
+          onClick={handleZoomIn}
           className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
-
+          title="Zoom In"
         >
           <Plus size={16} />
         </button>
         <button 
-          onClick={() => setPosition(p => ({ ...p, zoom: p.zoom / 1.2 }))}
-
-          className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors">
-
-
+          onClick={handleZoomOut}
+          className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
+          title="Zoom Out"
+        >
           <Minus size={16} />
         </button>
       </div>
