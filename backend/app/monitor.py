@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 GEO_CACHE = {}
 
 def get_ip_location(ip_address: str) -> Dict[str, Any]:
-
     
     clean_ip = ip_address.split(':')[0]
     if clean_ip in GEO_CACHE: return GEO_CACHE[clean_ip]
@@ -47,13 +46,24 @@ def capture_snapshot():
             SELECT 
                 COUNT(DISTINCT ip_address), 
                 COUNT(DISTINCT CASE WHEN timestamp > NOW() - INTERVAL '15 minutes' THEN ip_address END), 
-                SUM(storage_committed_bytes) 
-            FROM node_stats 
-            -- No WHERE clause needed for total, as the table only holds 24h of data due to cleanup_old_data()
+                (
+                    SELECT SUM(storage_committed_bytes) 
+                    FROM (
+                        SELECT DISTINCT ON (ip_address) storage_committed_bytes 
+                        FROM node_stats 
+                        ORDER BY ip_address, id DESC
+                    ) AS latest_storage
+                )
+            FROM node_stats
         """)
         
         r = cur.fetchone()
-        cur.execute("INSERT INTO network_snapshots (total_nodes, online_nodes, total_storage_committed) VALUES (%s, %s, %s)", (r[0] or 0, r[1] or 0, r[2] or 0))
+        total_storage = r[2] if r[2] is not None else 0
+        
+        cur.execute(
+            "INSERT INTO network_snapshots (total_nodes, online_nodes, total_storage_committed) VALUES (%s, %s, %s)", 
+            (r[0] or 0, r[1] or 0, total_storage)
+        )
     except Exception as e:
         logger.error(f"Snapshot failed: {e}")
     finally: conn.close()
@@ -134,9 +144,7 @@ def save_batch(nodes: List[Dict[str, Any]]):
     logger.info(f"Saved {len(processed)} nodes.")
 
 def start_monitor():
-    init_db() 
-
-
+    init_db()
     cleanup_old_data()
     logger.info("Monitor Started")
     loops = 0
