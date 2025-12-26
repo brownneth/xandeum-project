@@ -1,76 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
-import { Plus, Minus, X, ArrowRight, Server, Activity } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 
 const worldUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
-
-
-export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
+export const WorldMap = ({ nodes, isDark, focusLocation }) => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
-  const [selectedCountry, setSelectedCountry] = useState(null);
+
 
   const validNodes = nodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
   const isScanning = nodes.length > 0 && validNodes.length < nodes.length;
-
-  const regionNames = useMemo(() => {
-    try {
-      return new Intl.DisplayNames(['en'], { type: 'region' });
-    } catch (e) {
-      return null;
-    }
-  }, []);
-
-  const getStatsForCountry = (geo) => {
-    const mapName = geo.properties.name;
-    if (!mapName) return null;
-
-    const relevantNodes = nodes.filter(n => {
-        const code = n.country || (n.geo ? n.geo.country : null);
-
-        if (!code) return false;
-
-        let nodeName = code;
-        if (regionNames) {
-            try {
-                nodeName = regionNames.of(code);
-            } catch (e) {}
-        }
-
-        const matchesName = mapName.includes(nodeName) || nodeName.includes(mapName);
-        
-        const matchesCode = (code === 'US' && mapName.includes('United States')) ||
-                            (code === 'GB' && mapName.includes('United Kingdom')) ||
-                            (code === 'RU' && mapName.includes('Russia'));
-
-        return matchesName || matchesCode;
-    });
-
-    if (relevantNodes.length === 0) return null;
-
-    const totalLatency = relevantNodes.reduce((acc, n) => acc + (n.latency || 0), 0);
-    const avgLatency = Math.round(totalLatency / relevantNodes.length);
-
-    return {
-        name: mapName,
-        count: relevantNodes.length,
-        nodes: relevantNodes,
-        avgLatency,
-        percent: ((relevantNodes.length / nodes.length) * 100).toFixed(1)
-    };
-  };
-
-  const handleCountryClick = (geo) => {
-    const stats = getStatsForCountry(geo);
-
-    if (stats) {
-
-        setSelectedCountry(stats);
-    } else {
-        setSelectedCountry(null);
-    }
-  };
-
+  
   useEffect(() => {
     if (focusLocation) {
       setPosition({
@@ -106,167 +46,68 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
           onMoveEnd={handleMoveEnd}
           minZoom={1} 
           maxZoom={8}
-          translateExtent={[[-100, -100], [900, 700]]}
+          translateExtent={[
+            [-100, -100],
+            [900, 700]    
+          ]}
           style={{ transition: 'transform 0.5s ease-out' }}
         >
           <Geographies geography={worldUrl}>
             {({ geographies }) =>
-              geographies.map((geo) => {
-                const mapName = geo.properties.name;
-                
-                const hasNodes = nodes.some(n => {
-                    const code = n.country || (n.geo ? n.geo.country : null);
-                    if (!code) return false;
-                    
-                    let nodeName = code;
-                    if (regionNames) { try { nodeName = regionNames.of(code); } catch(e){} }
-                    
-                    const matchesName = mapName && (mapName.includes(nodeName) || nodeName.includes(mapName));
-                    const matchesCode = (code === 'US' && mapName?.includes('United States')) ||
-                                        (code === 'GB' && mapName?.includes('United Kingdom')) ||
-                                        (code === 'RU' && mapName?.includes('Russia'));
-
-                    return matchesName || matchesCode;
-                });
-
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    onClick={() => handleCountryClick(geo)}
-                    fill={isDark ? "#262626" : "#e0e0e0"}
-                    stroke={isDark ? "#333" : "#fff"}
-                    strokeWidth={0.5}
-                    style={{
-                      default: { outline: "none", transition: "all 0.3s" },
-                      hover: { 
-                        fill: hasNodes ? (isDark ? "#1e3a8a" : "#93c5fd") : (isDark ? "#393939" : "#cfcfcf"), 
-                        outline: "none", 
-                        cursor: hasNodes ? "pointer" : "default" 
-                      },
-                      pressed: { outline: "none" },
-                    }}
-                    title={mapName}
-                  />
-                );
-              })
+              geographies.map((geo) => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill={isDark ? "#262626" : "#e0e0e0"}
+                  stroke={isDark ? "#333" : "#fff"}
+                  strokeWidth={0.5}
+                  style={{
+                    default: { outline: "none" },
+                    hover: { fill: isDark ? "#393939" : "#cfcfcf", outline: "none" },
+                    pressed: { outline: "none" },
+                  }}
+                />
+              ))
             }
           </Geographies>
           {validNodes.map((node, i) => (
-             <Marker key={`${node.id || i}`} coordinates={[node.geo.lng, node.geo.lat]}>
-               <circle r={2} fill="#42be65" stroke={isDark ? "#161616" : "#fff"} strokeWidth={0.5} />
-             </Marker>
+            <Marker key={`${node.id}-${i}`} coordinates={[node.geo.lng, node.geo.lat]}>
+              <circle r={2} fill="#42be65" stroke={isDark ? "#161616" : "#fff"} strokeWidth={0.5} />
+            </Marker>
           ))}
         </ZoomableGroup>
       </ComposableMap>
-
-      <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-xs px-3 py-2 rounded border border-white/10 pointer-events-none select-none transition-all duration-500 z-10">
+      <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-xs px-3 py-2 rounded border border-white/10 pointer-events-none select-none transition-all duration-500">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${
             isScanning 
               ? 'bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.6)]' 
               : 'bg-green-500'
           }`}/>
-
+          
           <span className="font-mono">
             {validNodes.length} Locations Resolved
           </span>
         </div>
       </div>
-
-      <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-10">
+      <div className="absolute bottom-4 right-4 flex flex-col gap-1">
         <button 
           onClick={handleZoomIn}
           className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
+          title="Zoom In"
         >
           <Plus size={16} />
         </button>
         <button 
           onClick={handleZoomOut}
           className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
+          title="Zoom Out"
         >
           <Minus size={16} />
         </button>
       </div>
 
-      <div 
-        className={`
-            absolute top-0 right-0 h-full w-80 shadow-2xl z-20 
-            transform transition-transform duration-300 ease-in-out
-            border-l ${isDark ? 'border-[#393939] bg-[#161616] text-white' : 'border-gray-200 bg-white text-gray-900'}
-            ${selectedCountry ? 'translate-x-0' : 'translate-x-full'}
-        `}
-      >
-        {selectedCountry && (
-          <div className="h-full flex flex-col p-6">
 
-             <div className="flex justify-between items-start mb-8">
-                <div>
-                    <h3 className="text-xl font-light tracking-wide">{selectedCountry.name}</h3>
-                    <p className="text-xs opacity-60 uppercase tracking-widest mt-1">Region Inspector</p>
-                </div>
-                <button 
-                  onClick={() => setSelectedCountry(null)}
-                  className={`p-1 rounded opacity-50 hover:opacity-100 transition-opacity ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
-                >
-                  <X size={20} />
-                </button>
-             </div>
-
-             <div className="mb-8">
-                 <div className="flex items-center gap-3 mb-2">
-                     <Server className="text-blue-500" size={24} />
-                     <span className="text-4xl font-light">{selectedCountry.count}</span>
-                 </div>
-                 <div className="text-sm opacity-60">Active Nodes Found</div>
-             </div>
-
-             <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className={`p-3 rounded border ${isDark ? 'border-[#333] bg-[#262626]' : 'border-gray-200 bg-gray-50'}`}>
-                    <div className="text-[10px] uppercase opacity-60 mb-1">Network Share</div>
-                    <div className="text-xl font-mono">{selectedCountry.percent}%</div>
-                </div>
-                <div className={`p-3 rounded border ${isDark ? 'border-[#333] bg-[#262626]' : 'border-gray-200 bg-gray-50'}`}>
-                    <div className="text-[10px] uppercase opacity-60 mb-1">Avg Latency</div>
-                    <div className={`text-xl font-mono ${selectedCountry.avgLatency < 100 ? 'text-green-500' : 'text-yellow-500'}`}>
-                        {selectedCountry.avgLatency}ms
-                    </div>
-                </div>
-             </div>
-
-             <div className="mb-auto">
-                 <div className="flex items-center gap-2 mb-2 opacity-70">
-                    <Activity size={14} />
-                    <span className="text-xs">Connection Quality</span>
-                 </div>
-                 <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
-                    <div 
-                        className="h-full bg-blue-500 transition-all duration-500" 
-                        style={{ width: `${Math.min(100, 100 - (selectedCountry.avgLatency / 5))}%` }} 
-                    />
-                 </div>
-                 <div className="flex justify-between text-[10px] opacity-40 mt-1 font-mono">
-                    <span>0ms</span>
-                    <span>500ms+</span>
-                 </div>
-             </div>
-
-             <div className="mt-6 border-t border-dashed border-gray-700 pt-6">
-                 <button 
-                    onClick={() => {
-                        if (onSelectCountry) onSelectCountry(selectedCountry.name);
-                        setSelectedCountry(null);
-                    }}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors shadow-lg shadow-blue-900/20"
-                 >
-                    View Node List
-                    <ArrowRight size={16} />
-                 </button>
-             </div>
-
-          </div>
-        )}
-      </div>
 
     </div>
   );
