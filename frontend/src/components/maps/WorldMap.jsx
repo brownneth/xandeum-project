@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { Plus, Minus, X, ArrowRight, Server, Activity } from 'lucide-react';
 
@@ -12,12 +12,26 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
   
   const isScanning = nodes.length > 0 && validNodes.length < nodes.length;
 
-  const getStatsForCountry = (countryName) => {
-    const relevantNodes = nodes.filter(n => 
-        n.location && n.location.includes(countryName)
-    );
+  const normalize = (str) => (str || "").toLowerCase();
 
-    if (relevantNodes.length === 0) return null;
+  const getStatsForCountry = (geo) => {
+    const countryName = geo.properties.name; 
+    const iso3 = geo.id; 
+    const iso2 = geo.properties.iso_a2; 
+    
+
+    const relevantNodes = nodes.filter(n => {
+        const loc = normalize(n.location);
+        const nameMatch = loc.includes(normalize(countryName));
+        const codeMatch = iso3 && loc.includes(normalize(iso3));
+        
+        return nameMatch || codeMatch;
+    });
+
+    if (relevantNodes.length === 0) {
+        console.log(`No nodes found for ${countryName}. Check your node.location strings.`);
+        return null;
+    }
 
     const totalLatency = relevantNodes.reduce((acc, n) => acc + (n.latency || 0), 0);
     const avgLatency = Math.round(totalLatency / relevantNodes.length);
@@ -32,10 +46,10 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
   };
 
   const handleCountryClick = (geo) => {
-    const countryName = geo.properties.name;
-    const stats = getStatsForCountry(countryName);
+    const stats = getStatsForCountry(geo);
     
     if (stats) {
+        console.log("Stats found:", stats);
         setSelectedCountry(stats);
     } else {
         setSelectedCountry(null);
@@ -51,15 +65,9 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
     }
   }, [focusLocation]);
 
-  const handleZoomIn = () => {
-    if (position.zoom >= 8) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom * 1.2 }));
-  };
 
-  const handleZoomOut = () => {
-    if (position.zoom <= 1) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom / 1.2 }));
-  };
+
+
 
   const handleMoveEnd = (position) => {
     setPosition(position);
@@ -77,17 +85,18 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
           onMoveEnd={handleMoveEnd}
           minZoom={1} 
           maxZoom={8}
-          translateExtent={[
-            [-100, -100],
-            [900, 700]    
-          ]}
+          translateExtent={[[-100, -100], [900, 700]]}
           style={{ transition: 'transform 0.5s ease-out' }}
         >
           <Geographies geography={worldUrl}>
             {({ geographies }) =>
               geographies.map((geo) => {
                 const countryName = geo.properties.name;
-                const hasNodes = nodes.some(n => n.location && n.location.includes(countryName));
+                const iso3 = geo.id;
+                const hasNodes = nodes.some(n => {
+                    const loc = normalize(n.location);
+                    return loc.includes(normalize(countryName)) || (iso3 && loc.includes(normalize(iso3)));
+                });
 
                 return (
                   <Geography
@@ -106,6 +115,7 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
                       },
                       pressed: { outline: "none" },
                     }}
+                    title={hasNodes ? "Click to view details" : ""}
                   />
                 );
               })
@@ -136,17 +146,18 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
 
       <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-10">
         <button 
-          onClick={handleZoomIn}
+          onClick={() => setPosition(p => ({ ...p, zoom: p.zoom * 1.2 }))}
           className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
-          title="Zoom In"
+
         >
           <Plus size={16} />
         </button>
         <button 
-          onClick={handleZoomOut}
-          className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
-          title="Zoom Out"
-        >
+          onClick={() => setPosition(p => ({ ...p, zoom: p.zoom / 1.2 }))}
+
+          className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors">
+
+
           <Minus size={16} />
         </button>
       </div>
@@ -161,7 +172,7 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
       >
         {selectedCountry && (
           <div className="h-full flex flex-col p-6">
-             
+
              <div className="flex justify-between items-start mb-8">
                 <div>
                     <h3 className="text-xl font-light tracking-wide">{selectedCountry.name}</h3>
