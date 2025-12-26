@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 GEO_CACHE = {}
 
 def get_ip_location(ip_address: str) -> Dict[str, Any]:
-    
 
+    
     clean_ip = ip_address.split(':')[0]
     if clean_ip in GEO_CACHE: return GEO_CACHE[clean_ip]
     try:
@@ -42,10 +42,20 @@ def capture_snapshot():
     conn.autocommit = True
     try:
         cur = conn.cursor()
-        cur.execute("SELECT COUNT(DISTINCT ip_address), COUNT(DISTINCT CASE WHEN timestamp > NOW() - INTERVAL '15 minutes' THEN ip_address END), SUM(storage_committed_bytes) FROM node_stats WHERE timestamp > NOW() - INTERVAL '1 hour'")
+        
+        cur.execute("""
+            SELECT 
+                COUNT(DISTINCT ip_address), 
+                COUNT(DISTINCT CASE WHEN timestamp > NOW() - INTERVAL '15 minutes' THEN ip_address END), 
+                SUM(storage_committed_bytes) 
+            FROM node_stats 
+            -- No WHERE clause needed for total, as the table only holds 24h of data due to cleanup_old_data()
+        """)
+        
         r = cur.fetchone()
         cur.execute("INSERT INTO network_snapshots (total_nodes, online_nodes, total_storage_committed) VALUES (%s, %s, %s)", (r[0] or 0, r[1] or 0, r[2] or 0))
-    except: pass
+    except Exception as e:
+        logger.error(f"Snapshot failed: {e}")
     finally: conn.close()
 
 def fetch_network_state(seed_ip: str):

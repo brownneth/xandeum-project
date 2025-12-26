@@ -11,6 +11,18 @@ import {
 } from 'recharts';
 import { formatStorage } from '../../utils/formatters';
 
+const formatDate = (timestamp) => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+ 
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    hour: 'numeric', 
+    minute: '2-digit' 
+  });
+};
+
 export const NetworkHistoryChart = ({ data, isDark }) => {
   const [visibleSeries, setVisibleSeries] = useState({
     storage: true,
@@ -50,10 +62,11 @@ export const NetworkHistoryChart = ({ data, isDark }) => {
 
             <XAxis 
               dataKey="timestamp" 
-              tickFormatter={(t) => new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              tickFormatter={formatDate}
               stroke={colors.text}
               tick={{ fill: colors.text }}
               dy={10} 
+              minTickGap={30}
             />
 
             <YAxis 
@@ -79,7 +92,11 @@ export const NetworkHistoryChart = ({ data, isDark }) => {
                 borderRadius: '4px',
                 color: isDark ? '#fff' : '#000'
               }}
-              labelFormatter={(t) => new Date(t).toLocaleString()}
+              labelFormatter={formatDate}
+              formatter={(value, name) => {
+                if (name === "Storage Capacity") return formatStorage(value);
+                return value;
+              }}
             />
             
             <Area 
