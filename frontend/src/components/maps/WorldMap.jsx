@@ -18,24 +18,26 @@ const countryCodeMap = {
   "CA": "Canada",
   "CN": "China",
   "RU": "Russia",
-  "ZA": "South Africa"
+  "ZA": "South Africa",
+  "NL": "Netherlands"
 };
 
 export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
   const [selectedCountry, setSelectedCountry] = useState(null);
   
-  const validNodes = nodes.filter(n => n.lat && n.lon);
+  const validNodes = nodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
   const isScanning = nodes.length > 0 && validNodes.length < nodes.length;
-  
+
 
   const getStatsForCountry = (geo) => {
-    const mapCountryName = geo.properties.name;
+    const mapCountryName = geo.properties.name; 
 
     const relevantNodes = nodes.filter(n => {
-        if (!n.country) return false;
-        const mappedName = countryCodeMap[n.country];
-        return mappedName === mapCountryName;
+        const code = n.country || (n.geo ? n.geo.country : null);
+        if (!code) return false;
+        const mappedName = countryCodeMap[code];
+        return mappedName === mapCountryName || mapCountryName.includes(mappedName);
     });
 
     if (relevantNodes.length === 0) return null;
@@ -105,10 +107,11 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
             {({ geographies }) =>
               geographies.map((geo) => {
                 const mapCountryName = geo.properties.name;
-                
+
                 const hasNodes = nodes.some(n => {
-                    if (!n.country) return false;
-                    return countryCodeMap[n.country] === mapCountryName;
+                    const code = n.country || (n.geo ? n.geo.country : null);
+                    if (!code) return false;
+                    return countryCodeMap[code] === mapCountryName;
                 });
 
                 return (
@@ -135,7 +138,7 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
             }
           </Geographies>
           {validNodes.map((node, i) => (
-            <Marker key={`${node.ip_address}-${i}`} coordinates={[node.lon, node.lat]}>
+            <Marker key={`${node.id}-${i}`} coordinates={[node.geo.lng, node.geo.lat]}>
               <circle r={2} fill="#42be65" stroke={isDark ? "#161616" : "#fff"} strokeWidth={0.5} />
             </Marker>
           ))}
