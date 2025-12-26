@@ -9,32 +9,41 @@ const worldUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
   const [selectedCountry, setSelectedCountry] = useState(null);
-  
+
   const validNodes = nodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
   const isScanning = nodes.length > 0 && validNodes.length < nodes.length;
 
   const regionNames = useMemo(() => {
     try {
       return new Intl.DisplayNames(['en'], { type: 'region' });
-    } catch (error) {
+    } catch (e) {
       return null;
     }
   }, []);
 
   const getStatsForCountry = (geo) => {
-    const mapCountryName = geo.properties.name;
+    const mapName = geo.properties.name;
+    if (!mapName) return null;
 
     const relevantNodes = nodes.filter(n => {
         const code = n.country || (n.geo ? n.geo.country : null);
-        
+
         if (!code) return false;
 
-        try {
-            const nodeCountryName = regionNames ? regionNames.of(code) : code;
-            return mapCountryName.includes(nodeCountryName) || nodeCountryName.includes(mapCountryName);
-        } catch (e) {
-            return false;
+        let nodeName = code;
+        if (regionNames) {
+            try {
+                nodeName = regionNames.of(code);
+            } catch (e) {}
         }
+
+        const matchesName = mapName.includes(nodeName) || nodeName.includes(mapName);
+        
+        const matchesCode = (code === 'US' && mapName.includes('United States')) ||
+                            (code === 'GB' && mapName.includes('United Kingdom')) ||
+                            (code === 'RU' && mapName.includes('Russia'));
+
+        return matchesName || matchesCode;
     });
 
     if (relevantNodes.length === 0) return null;
@@ -43,7 +52,7 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
     const avgLatency = Math.round(totalLatency / relevantNodes.length);
 
     return {
-        name: mapCountryName,
+        name: mapName,
         count: relevantNodes.length,
         nodes: relevantNodes,
         avgLatency,
@@ -103,15 +112,21 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
           <Geographies geography={worldUrl}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const mapCountryName = geo.properties.name;
+                const mapName = geo.properties.name;
                 
                 const hasNodes = nodes.some(n => {
                     const code = n.country || (n.geo ? n.geo.country : null);
                     if (!code) return false;
-                    try {
-                        const name = regionNames ? regionNames.of(code) : code;
-                        return mapCountryName.includes(name) || name.includes(mapCountryName);
-                    } catch (e) { return false; }
+                    
+                    let nodeName = code;
+                    if (regionNames) { try { nodeName = regionNames.of(code); } catch(e){} }
+                    
+                    const matchesName = mapName && (mapName.includes(nodeName) || nodeName.includes(mapName));
+                    const matchesCode = (code === 'US' && mapName?.includes('United States')) ||
+                                        (code === 'GB' && mapName?.includes('United Kingdom')) ||
+                                        (code === 'RU' && mapName?.includes('Russia'));
+
+                    return matchesName || matchesCode;
                 });
 
                 return (
@@ -131,23 +146,22 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
                       },
                       pressed: { outline: "none" },
                     }}
-
+                    title={mapName}
                   />
                 );
               })
             }
           </Geographies>
           {validNodes.map((node, i) => (
-            <Marker key={`${node.id || i}`} coordinates={[node.geo.lng, node.geo.lat]}>
-              <circle r={2} fill="#42be65" stroke={isDark ? "#161616" : "#fff"} strokeWidth={0.5} />
-            </Marker>
+             <Marker key={`${node.id || i}`} coordinates={[node.geo.lng, node.geo.lat]}>
+               <circle r={2} fill="#42be65" stroke={isDark ? "#161616" : "#fff"} strokeWidth={0.5} />
+             </Marker>
           ))}
         </ZoomableGroup>
       </ComposableMap>
 
       <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-xs px-3 py-2 rounded border border-white/10 pointer-events-none select-none transition-all duration-500 z-10">
-        <div className=
-        "flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${
             isScanning 
               ? 'bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.6)]' 
@@ -163,15 +177,13 @@ export const WorldMap = ({ nodes, isDark, focusLocation, onSelectCountry }) => {
       <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-10">
         <button 
           onClick={handleZoomIn}
-          className=
-          "p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
+          className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
         >
           <Plus size={16} />
         </button>
         <button 
           onClick={handleZoomOut}
-          className="p-2 bg-black/80 backdrop-blur text
-          -white border border-white/10 rounded hover:bg-black transition-colors"
+          className="p-2 bg-black/80 backdrop-blur text-white border border-white/10 rounded hover:bg-black transition-colors"
         >
           <Minus size={16} />
         </button>
