@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Query
-from fastapi.middleware.cors import CORSMiddleware  
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from psycopg2.extras import RealDictCursor
 from contextlib import asynccontextmanager
@@ -31,7 +31,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",                 
-        "https://xplorer-ten.vercel.app",       
+        "https://xplorer-ten.vercel.app",        
         "https://xplorer-ten.vercel.app/"        
     ],
     allow_credentials=True,
@@ -45,7 +45,7 @@ def health_check():
 
 @app.get("/stats", response_model=NetworkStatsResponse, tags=["Stats"])
 def get_network_stats():
-    
+
     conn = get_db_connection()
     try:
         cur = conn.cursor()

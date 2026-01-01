@@ -41,7 +41,7 @@ def capture_snapshot():
     conn.autocommit = True
     try:
         cur = conn.cursor()
-        
+
         cur.execute("""
             SELECT 
                 COUNT(DISTINCT ip_address), 
@@ -86,8 +86,6 @@ def probe_deep_stats(node: Dict[str, Any]):
     if not node.get('is_public', False) or not ip: return node
 
 
-
-
     try:
 
         resp = requests.post(f"http://{ip}:{port}/rpc", json={"jsonrpc": "2.0", "method": "get-stats", "id": 1}, timeout=2)
@@ -105,7 +103,7 @@ def probe_deep_stats(node: Dict[str, Any]):
 
 def save_batch(nodes: List[Dict[str, Any]]):
     processed = []
-    with ThreadPoolExecutor(max_workers=20) as ex:
+    with ThreadPoolExecutor(max_workers=5) as ex:
         futures = {ex.submit(probe_deep_stats, n): n for n in nodes}
         for f in as_completed(futures): processed.append(f.result())
 
@@ -144,7 +142,7 @@ def save_batch(nodes: List[Dict[str, Any]]):
     logger.info(f"Saved {len(processed)} nodes.")
 
 def start_monitor():
-    init_db()
+    init_db() 
     cleanup_old_data()
     logger.info("Monitor Started")
     loops = 0
