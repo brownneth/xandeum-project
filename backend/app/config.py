@@ -6,8 +6,12 @@ DATABASE_URL = "postgresql://neondb_owner:npg_ru6OEQjSMR4H@ep-aged-credit-ag03cw
 
 # Network Configuration
 SEED_IPS = [
-    "161.97.97.41", "192.190.136.36", "192.190.136.38",
-    "192.190.136.28", "192.190.136.29", "207.244.255.1"
+    "173.212.220.65",  
+    "173.212.207.32",
+    "173.249.54.191",
+    "167.86.123.82",
+    "152.53.236.91",
+    "144.91.90.185"
 ]
 RPC_PORT = 6000
 POLL_INTERVAL_SECONDS = 60
