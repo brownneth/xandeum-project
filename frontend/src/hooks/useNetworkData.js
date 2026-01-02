@@ -61,7 +61,7 @@ export const useNetworkData = () => {
       }
       setTimeout(processGeoQueue, 10); 
     } else {
-
+      
       try {
         const data = await api.getGeoLocation(ip);
         if (data.status === 'success') {
@@ -90,19 +90,19 @@ export const useNetworkData = () => {
 
       const newNodes = rawData.map((n, i) => {
         const baseIp = n.ip_address.split(':')[0];
-        
+
         const hasBackendGeo = n.lat && n.lon; 
 
         return {
+          ...n,
           id: n.id || `node-${pageNum}-${i}`,
           fullAddress: n.ip_address,
           baseIp: baseIp,
-          version: n.version,
-          status: n.status,
-          storage: n.storage_committed_bytes || 0,
+
           formattedStorage: formatStorage(n.storage_committed_bytes || 0),
+          storage: n.storage_committed_bytes || 0,
           lastSeen: n.last_seen,
-          
+
           geo: hasBackendGeo ? { lat: n.lat, lng: n.lon } : null,
           location: (n.city && n.country) ? `${n.city}, ${n.country}` : "Resolving..."
         };
