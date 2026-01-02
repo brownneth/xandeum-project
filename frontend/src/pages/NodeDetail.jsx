@@ -3,7 +3,7 @@ import {
   ArrowLeft, 
   Server, 
   MapPin, 
-  Activity, 
+  
   Shield, 
   Globe, 
   Copy, 
@@ -14,7 +14,9 @@ import {
   Network,
   ArrowUpRight,
   ArrowDownLeft,
-  ScanEye 
+  ScanEye,
+  Clock,
+  Activity
 } from 'lucide-react';
 import { formatRelativeTime, formatBytes, formatUptime, formatNumber } from '../utils/formatters';
 
@@ -39,11 +41,12 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
   const ramPercent = ramTotal > 0 ? Math.min(((ramUsed / ramTotal) * 100), 100) : 0;
   const showRam = ramTotal > 0;
 
+  const cpuPercent = item.cpu_percent || 0; 
+  const showCpu = true; 
 
   const packetsSent = item.packets_sent || 0;
   const packetsReceived = item.packets_received || 0;
   
-
   const colors = isDark 
     ? { 
         bg: 'bg-[#161616]', 
@@ -113,13 +116,13 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                 <h2 className={`text-2xl font-light font-mono ${colors.text}`}>
                   {item.fullAddress}
                 </h2>
+
                 
-                {/* FLAT STATUS TAG */}
                 <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${getStatusColor(item.status)}`}>
                   {item.status}
                 </span>
 
-                {/* FLAT TYPE TAG */}
+
                 <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-1 ${
                   isPrivate
                     ? (isDark ? 'text-purple-300 bg-purple-900/40' : 'text-purple-800 bg-purple-100')
@@ -142,8 +145,15 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                 
                 <span className="w-1 h-1 rounded-full bg-gray-500 opacity-50"/>
                 <span>Last Seen: {formatRelativeTime(item.lastSeen)}</span>
+                
                 <span className="w-1 h-1 rounded-full bg-gray-500 opacity-50"/>
-                <span>Version: {item.version}</span>
+                <div className="flex items-center gap-1.5" title="Total continuous uptime">
+                    <Clock size={12} className={isDark ? 'text-blue-400' : 'text-blue-600'} />
+                    <span>Uptime: {formatUptime(item.uptime_seconds)}</span>
+                </div>
+
+                <span className="w-1 h-1 rounded-full bg-gray-500 opacity-50"/>
+                <span>v{item.version}</span>
               </div>
            </div>
         </div>
@@ -203,6 +213,39 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                 </div>
             </div>
 
+            {/* NEW: CPU Card */}
+            {showCpu && (
+               <div className={`${colors.card} border ${colors.border} p-6 rounded-lg flex flex-col`}>
+                  <div className="flex items-center gap-2 mb-6">
+                      <Activity size={18} className={colors.accent} />
+                      <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text}`}>CPU Load</h3>
+                  </div>
+
+                  <div className="flex-1 flex flex-col justify-center">
+                      <div className="flex justify-between items-end mb-2">
+                          <span className={`text-3xl font-light ${colors.text}`}>
+                            {cpuPercent.toFixed(1)}%
+                          </span>
+                          <span className={`text-xs font-mono ${colors.subText}`}>
+                            Load Average
+                          </span>
+                      </div>
+
+                      <div className={`w-full h-2 rounded-sm overflow-hidden ${colors.progressBg}`}>
+                          <div 
+                            className={`h-full transition-all duration-1000 ease-out ${cpuPercent > 80 ? 'bg-red-500' : 'bg-[#0F62FE]'}`} 
+                            style={{ width: `${Math.min(cpuPercent, 100)}%` }} 
+                          />
+                      </div>
+                      
+                      <div className="mt-3 flex justify-between text-[10px] uppercase font-mono opacity-60">
+                          <span className={colors.subText}>Status: {cpuPercent > 90 ? 'Critical' : 'Healthy'}</span>
+                          <span className={colors.subText}>Cores: Auto</span>
+                      </div>
+                  </div>
+               </div>
+            )}
+
             {/* Memory Card */}
             {showRam && (
                <div className={`${colors.card} border ${colors.border} p-6 rounded-lg flex flex-col`}>
@@ -242,7 +285,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                     <MapPin size={18} className={isPrivate ? 'text-purple-500' : colors.success} />
                     <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text}`}>Physical Location</h3>
                     
-                    {/* UPDATED: "Ghost Link" Style Button */}
+
                     {!isPrivate && (
                         <button 
                           onClick={() => onViewOnMap(item)}
@@ -286,7 +329,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
             </div>
 
             {/* Network Activity */}
-            <div className={`${showRam ? '' : 'md:col-span-2'} ${colors.card} border ${colors.border} p-6 rounded-lg`}>
+            <div className={`md:col-span-2 ${colors.card} border ${colors.border} p-6 rounded-lg`}>
                 <div className="flex items-center gap-2 mb-6">
                     <Network size={18} className={colors.accent} />
                     <h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text}`}>Network Activity</h3>
@@ -323,7 +366,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
       ) : (
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
-           
+
            <div className={`${colors.card} border ${colors.border} p-6 rounded-lg`}>
               <div className="flex items-center gap-2 mb-6">
                  <Server size={18} className={colors.accent} />
@@ -361,7 +404,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                        <span className={colors.subText}>Uptime</span>
                        <span className={`font-mono ${colors.text}`}>{formatUptime(item.uptime_seconds)}</span>
                    </div>
-                   
+
                    {item.os ? (
                       <div className="flex justify-between py-2 border-b border-gray-800">
                           <span className={colors.subText}>Operating System</span>
