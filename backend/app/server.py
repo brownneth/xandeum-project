@@ -87,17 +87,28 @@ def get_nodes(
     offset = (page - 1) * limit
 
     try:
-        query = "SELECT DISTINCT ON (ip_address) * FROM node_stats"
+        base_query = """
+            SELECT DISTINCT ON (ns.ip_address) 
+                ns.*,
+                gc.lat, gc.lon, gc.country, gc.city
+            FROM node_stats ns
+            LEFT JOIN geo_cache gc ON ns.ip_address = gc.ip_address
+        """
+        
         params = []
+        where_clauses = []
 
         if search:
-            query += " WHERE ip_address LIKE %s"
+            where_clauses.append("ns.ip_address LIKE %s")
             params.append(f"%{search}%")
+            
+        if where_clauses:
+            base_query += " WHERE " + " AND ".join(where_clauses)
         
-        query += " ORDER BY ip_address, id DESC LIMIT %s OFFSET %s"
+        base_query += " ORDER BY ns.ip_address, ns.id DESC LIMIT %s OFFSET %s"
         params.extend([limit, offset])
 
-        cursor.execute(query, tuple(params))
+        cursor.execute(base_query, tuple(params))
         rows = cursor.fetchall()
     except Exception as e:
         print(f"ERROR: {e}")
@@ -130,6 +141,7 @@ def get_nodes(
             "lon": r.get('lon'),
             "country": r.get('country'),
             "city": r.get('city'),
+            
             "uptime_seconds": r.get('uptime_seconds', 0)
         })
     
