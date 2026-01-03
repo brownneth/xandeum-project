@@ -5,7 +5,8 @@ import { NetworkHistoryChart } from '../components/charts/NetworkHistoryChart';
 import { WorldMap } from '../components/maps/WorldMap';
 import { useNetworkData } from '../hooks/useNetworkData';
 
-const Dashboard = () => {
+// FIXED: Changed to 'export const' (Named Export) to match App.jsx import
+export const Dashboard = () => {
   const { nodes, mapNodes, stats, history, loading } = useNetworkData();
   const [isDark, setIsDark] = useState(true);
 
@@ -74,7 +75,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex-1 rounded-lg overflow-hidden border border-white/5 bg-[#0a0a0a]">
-            {/* 3. CRITICAL FIX: Pass 'mapNodes' to the map */}
+           
             <WorldMap mapNodes={mapNodes} isDark={isDark} />
           </div>
         </div>
@@ -120,4 +121,3 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
