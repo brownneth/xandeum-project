@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import { formatStorage } from '../utils/formatters';
 
 export const useNetworkData = () => {
-  const [nodes, setNodes] = useState([]); 
+  const [nodes, setNodes] = useState([]);
   const [mapNodes, setMapNodes] = useState([]); 
   const [stats, setStats] = useState({
     totalNodes: 0,
@@ -15,7 +15,7 @@ export const useNetworkData = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  
+
 
   const fetchGlobalData = async () => {
     try {
@@ -34,6 +34,7 @@ export const useNetworkData = () => {
 
       setHistory(historyData);
 
+     
       const formattedMapNodes = mapData.map((n, i) => ({
         id: `map-node-${i}`,
         ip: n.ip,

@@ -4,7 +4,7 @@ import { Plus, Minus } from 'lucide-react';
 
 const worldUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
-export const WorldMap = ({ mapNodes, isDark, focusLocation }) => {
+export const WorldMap = ({ mapNodes = [], isDark, focusLocation }) => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
 
   const validNodes = mapNodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
