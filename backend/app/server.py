@@ -92,7 +92,7 @@ def get_nodes(
                 ns.*,
                 gc.lat, gc.lon, gc.country, gc.city
             FROM node_stats ns
-            LEFT JOIN geo_cache gc ON ns.ip_address = gc.ip_address
+            LEFT JOIN geo_cache gc ON SPLIT_PART(ns.ip_address, ':', 1) = gc.ip_address
         """
         
         params = []
