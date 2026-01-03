@@ -3,15 +3,15 @@ import { Search, ChevronRight, ArrowLeft } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
 
 export const NodeExplorer = ({ nodes, loadMore, hasMore, loading, isDark, onRowClick, onNavigate }) => {
-  // Client-Side Search State
+ 
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Local Filter: Works instantly on the loaded nodes
+
   const filteredNodes = nodes.filter(node => 
     node.fullAddress.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Helper to get consistent badge colors based on theme
+
   const getStatusColor = (status) => {
     const isOnline = status === 'ONLINE';
     if (isDark) {
@@ -19,7 +19,7 @@ export const NodeExplorer = ({ nodes, loadMore, hasMore, loading, isDark, onRowC
         ? 'text-green-400 border-green-900 bg-green-900/20' 
         : 'text-red-400 border-red-900 bg-red-900/20';
     } else {
-      // Light Mode: Darker text for readability
+
       return isOnline 
         ? 'text-green-800 border-green-200 bg-green-100' 
         : 'text-red-800 border-red-200 bg-red-100';
@@ -28,7 +28,7 @@ export const NodeExplorer = ({ nodes, loadMore, hasMore, loading, isDark, onRowC
 
   return (
     <div className="animate-fade-in pb-12">
-      
+
       <div className="mb-4">
         <button 
           onClick={() => onNavigate('overview')}
@@ -107,9 +107,7 @@ export const NodeExplorer = ({ nodes, loadMore, hasMore, loading, isDark, onRowC
                 </td>
               </tr>
             ))}
-            {filteredNodes.length === 0 && !loading && (
-               <tr><td colSpan="7" className="p-8 text-center opacity-50">No nodes found</td></tr>
-            )}
+            
           </tbody>
         </table>
       </div>
