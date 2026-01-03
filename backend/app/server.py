@@ -4,19 +4,17 @@ from typing import List, Optional
 from psycopg2.extras import RealDictCursor
 from contextlib import asynccontextmanager
 
-import threading
+
 
 from .database import get_db_connection
 from .utils import format_bytes
 from .models import NodeStatsResponse, NetworkStatsResponse
-from .monitor import start_monitor
+
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("API Starting... launching Background Monitor...")
-    t = threading.Thread(target=start_monitor, daemon=True)
-    t.start()
+    print("API Starting...")
     yield
     print("API Shutting down...")
 
