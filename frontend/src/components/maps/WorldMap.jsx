@@ -4,12 +4,10 @@ import { Plus, Minus } from 'lucide-react';
 
 const worldUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
-export const WorldMap = ({ nodes, isDark, focusLocation }) => {
+export const WorldMap = ({ mapNodes, isDark, focusLocation }) => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
 
-
-  const validNodes = nodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
-  const isScanning = nodes.length > 0 && validNodes.length < nodes.length;
+  const validNodes = mapNodes.filter(n => n.geo && n.geo.lat && n.geo.lng);
   
   useEffect(() => {
     if (focusLocation) {
@@ -79,12 +77,7 @@ export const WorldMap = ({ nodes, isDark, focusLocation }) => {
       </ComposableMap>
       <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white text-xs px-3 py-2 rounded border border-white/10 pointer-events-none select-none transition-all duration-500">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${
-            isScanning 
-              ? 'bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.6)]' 
-              : 'bg-green-500'
-          }`}/>
-          
+          <span className="w-2 h-2 rounded-full bg-green-500"/>
           <span className="font-mono">
             {validNodes.length} Locations Resolved
           </span>
@@ -106,9 +99,7 @@ export const WorldMap = ({ nodes, isDark, focusLocation }) => {
           <Minus size={16} />
         </button>
       </div>
-
-
-
+      
     </div>
   );
 };

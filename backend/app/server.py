@@ -64,6 +64,38 @@ def get_network_stats():
         return {"total_nodes": 0, "online_nodes": 0, "total_storage_bytes": 0}
     finally: conn.close()
 
+@app.get("/map-nodes", tags=["Nodes"])
+def get_map_nodes():
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        query = """
+            SELECT DISTINCT ON (ns.clean_ip) 
+                ns.clean_ip, ns.status,
+                gs.lat, gs.lon, gs.country, gs.city
+            FROM node_stats ns
+            LEFT JOIN geo_state gs ON ns.clean_ip = gs.clean_ip
+            ORDER BY ns.clean_ip, ns.id DESC
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        results = []
+        for r in rows:
+            if r['lat'] and r['lon']:
+                results.append({
+                    "ip": r['clean_ip'],
+                    "status": r['status'],
+                    "lat": r['lat'],
+                    "lon": r['lon'],
+                    "location": f"{r['city']}, {r['country']}" if r['city'] else "Unknown"
+                })
+        return results
+    except Exception as e:
+        print(f"MAP ERROR: {e}")
+        return []
+    finally: conn.close()
+
 @app.get("/nodes", response_model=List[NodeStatsResponse], tags=["Nodes"])
 def get_nodes(
     page: int = Query(1, ge=1),
@@ -130,7 +162,7 @@ def get_nodes(
 
             "uptime_seconds": r.get('uptime_seconds', 0)
         })
-
+        
     return results
 
 @app.get("/history", tags=["Stats"])
