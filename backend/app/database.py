@@ -73,16 +73,20 @@ def init_db():
             )
         ''')
 
+        cur.execute("TRUNCATE geo_cache;") 
+        
         cur.execute('''
             INSERT INTO geo_cache (ip_address, lat, lon, country, city)
-            SELECT DISTINCT ON (ip_address) ip_address, lat, lon, country, city
+            SELECT DISTINCT ON (clean_ip) 
+                SPLIT_PART(ip_address, ':', 1) as clean_ip, 
+                lat, lon, country, city
             FROM node_stats
             WHERE lat IS NOT NULL
             ON CONFLICT (ip_address) DO NOTHING;
         ''')
         
         conn.commit()
-        print("Database initialized with LATEST schema and Geo Cache pre-warmed.")
+        print("Database initialized. Geo Cache REBUILT with CLEAN IPs.")
     except Exception as e:
         print(f"Init DB Error: {e}")
     finally:

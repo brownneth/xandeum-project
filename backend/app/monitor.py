@@ -166,6 +166,7 @@ def save_batch(nodes: List[Dict[str, Any]]):
     saved_count = 0
     for n in processed:
         get_ip_location(n.get('address', '0.0.0.0'))
+        
         uptime = n.get('uptime', 0)
         try:
             cursor.execute('''
@@ -173,9 +174,12 @@ def save_batch(nodes: List[Dict[str, Any]]):
                     timestamp, pubkey, ip_address, version, status,
                     storage_committed_bytes, storage_used_bytes, storage_percent, 
                     uptime, last_seen_timestamp, is_public, rpc_active, 
-                    cpu_percent, ram_used_bytes, lat, lon, country, city,
+                    cpu_percent, ram_used_bytes, 
+                    lat, lon, country, city,
                     rpc_port, packets_sent, packets_received, ram_total_bytes, uptime_seconds
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                          NULL, NULL, NULL, NULL, 
+                          %s, %s, %s, %s, %s)
             ''', (
                 now, n.get('pubkey', 'UNKNOWN'), n.get('address', '0.0.0.0'),
                 n.get('version', '0.0.0'), 'ONLINE', n.get('storage_committed', 0),
@@ -183,7 +187,7 @@ def save_batch(nodes: List[Dict[str, Any]]):
                 uptime, n.get('last_seen_timestamp', 0),
                 n.get('is_public', False), n.get('rpc_active', False),
                 n.get('cpu_percent', 0.0), n.get('ram_used_bytes', 0),
-                None, None, None, None,
+
                 n.get('rpc_port', 6000), n.get('packets_sent', 0), n.get('packets_received', 0),
                 n.get('ram_total_bytes', 0), uptime
             ))
