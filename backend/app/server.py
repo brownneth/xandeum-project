@@ -29,19 +29,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",                 
-        "https://xplorer-ten.vercel.app",        
-        "https://xplorer-ten.vercel.app/"        
-    ],
+    allow_origins=["http://localhost:5173", "https://xplorer-ten.vercel.app", "https://xplorer-ten.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.get("/", tags=["Health"])
-def health_check():
-    return {"status": "online", "service": "Xandeum API"}
+def health_check(): return {"status": "online", "service": "Xandeum API"}
 
 @app.get("/stats", response_model=NetworkStatsResponse, tags=["Stats"])
 def get_network_stats():
@@ -49,32 +44,27 @@ def get_network_stats():
     conn = get_db_connection()
     try:
         cur = conn.cursor()
-        cur.execute('SELECT COUNT(DISTINCT ip_address) FROM node_stats')
+        cur.execute('SELECT COUNT(DISTINCT clean_ip) FROM node_stats')
         total = cur.fetchone()[0] or 0
         
-        cur.execute("SELECT COUNT(DISTINCT ip_address) FROM node_stats WHERE timestamp > NOW() - INTERVAL '15 minutes'")
+        cur.execute("SELECT COUNT(DISTINCT clean_ip) FROM node_stats WHERE timestamp > NOW() - INTERVAL '15 minutes'")
         online = cur.fetchone()[0] or 0
         
         cur.execute('''
             SELECT SUM(storage_committed_bytes) 
             FROM (
-                SELECT DISTINCT ON (ip_address) storage_committed_bytes 
+                SELECT DISTINCT ON (clean_ip) storage_committed_bytes 
                 FROM node_stats 
-                ORDER BY ip_address, id DESC
+                ORDER BY clean_ip, id DESC
             ) as latest_rows
         ''')
         storage = cur.fetchone()[0] or 0
         
-        return {
-            "total_nodes": total, 
-            "online_nodes": online, 
-            "total_storage_bytes": int(storage)
-        }
+        return {"total_nodes": total, "online_nodes": online, "total_storage_bytes": int(storage)}
     except Exception as e:
         print(f"STATS ERROR: {e}")
         return {"total_nodes": 0, "online_nodes": 0, "total_storage_bytes": 0}
-    finally:
-        conn.close()
+    finally: conn.close()
 
 @app.get("/nodes", response_model=List[NodeStatsResponse], tags=["Nodes"])
 def get_nodes(
@@ -88,11 +78,11 @@ def get_nodes(
 
     try:
         base_query = """
-            SELECT DISTINCT ON (ns.ip_address) 
+            SELECT DISTINCT ON (ns.clean_ip) 
                 ns.*,
-                gc.lat, gc.lon, gc.country, gc.city
+                gs.lat, gs.lon, gs.country, gs.city
             FROM node_stats ns
-            LEFT JOIN geo_cache gc ON SPLIT_PART(ns.ip_address, ':', 1) = gc.ip_address
+            LEFT JOIN geo_state gs ON ns.clean_ip = gs.clean_ip
         """
         
         params = []
@@ -102,10 +92,9 @@ def get_nodes(
             where_clauses.append("ns.ip_address LIKE %s")
             params.append(f"%{search}%")
             
-        if where_clauses:
-            base_query += " WHERE " + " AND ".join(where_clauses)
+        if where_clauses: base_query += " WHERE " + " AND ".join(where_clauses)
         
-        base_query += " ORDER BY ns.ip_address, ns.id DESC LIMIT %s OFFSET %s"
+        base_query += " ORDER BY ns.clean_ip, ns.id DESC LIMIT %s OFFSET %s"
         params.extend([limit, offset])
 
         cursor.execute(base_query, tuple(params))
@@ -113,13 +102,12 @@ def get_nodes(
     except Exception as e:
         print(f"ERROR: {e}")
         return []
-    finally:
-        conn.close()
+    finally: conn.close()
 
     results = []
     for r in rows:
         is_public = bool(r['is_public']) or bool(r['rpc_active'])
-        
+
         results.append({
             "ip_address": r['ip_address'] or "Unknown",
             "version": r['version'] or "unknown",
@@ -141,10 +129,10 @@ def get_nodes(
             "lon": r.get('lon'),
             "country": r.get('country'),
             "city": r.get('city'),
-            
+
             "uptime_seconds": r.get('uptime_seconds', 0)
         })
-    
+
     return results
 
 @app.get("/history", tags=["Stats"])
@@ -152,14 +140,7 @@ def get_network_history():
     conn = get_db_connection()
     try:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute('''
-            SELECT timestamp, total_nodes, total_storage_committed 
-            FROM network_snapshots 
-            ORDER BY timestamp ASC 
-            LIMIT 720
-        ''')
+        cursor.execute('SELECT timestamp, total_nodes, total_storage_committed FROM network_snapshots ORDER BY timestamp ASC LIMIT 720')
         return cursor.fetchall()
-    except Exception:
-        return []
-    finally:
-        conn.close()
+    except: return []
+    finally: conn.close()

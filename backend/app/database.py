@@ -22,21 +22,23 @@ def init_db():
         cur = conn.cursor()
         
         cur.execute('''
-            CREATE TABLE IF NOT EXISTS network_snapshots (
-                id SERIAL PRIMARY KEY,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                total_nodes INTEGER,
-                online_nodes INTEGER,
-                total_storage_committed BIGINT
+            CREATE TABLE IF NOT EXISTS geo_state (
+                clean_ip TEXT PRIMARY KEY,
+                lat FLOAT,
+                lon FLOAT,
+                country TEXT,
+                city TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        
+
         cur.execute('''
             CREATE TABLE IF NOT EXISTS node_stats (
                 id SERIAL PRIMARY KEY,
                 timestamp TIMESTAMP,
                 pubkey TEXT,
                 ip_address TEXT,
+                clean_ip TEXT,
                 version TEXT,
                 status TEXT,
                 storage_committed_bytes BIGINT,
@@ -52,41 +54,26 @@ def init_db():
                 packets_sent BIGINT DEFAULT 0,
                 packets_received BIGINT DEFAULT 0,
                 rpc_port INTEGER DEFAULT 6000,
-                uptime_seconds FLOAT DEFAULT 0,
-                lat FLOAT,
-                lon FLOAT,
-                country TEXT,
-                city TEXT
+                uptime_seconds FLOAT DEFAULT 0
             )
         ''')
         
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_clean_ip ON node_stats (clean_ip);")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_ip_timestamp ON node_stats (ip_address, timestamp DESC);")
 
         cur.execute('''
-            CREATE TABLE IF NOT EXISTS geo_cache (
-                ip_address TEXT PRIMARY KEY,
-                lat FLOAT,
-                lon FLOAT,
-                country TEXT,
-                city TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            CREATE TABLE IF NOT EXISTS network_snapshots (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                total_nodes INTEGER,
+                online_nodes INTEGER,
+                total_storage_committed BIGINT
             )
         ''')
-
-        cur.execute("TRUNCATE geo_cache;") 
         
-        cur.execute('''
-            INSERT INTO geo_cache (ip_address, lat, lon, country, city)
-            SELECT DISTINCT ON (clean_ip) 
-                SPLIT_PART(ip_address, ':', 1) as clean_ip, 
-                lat, lon, country, city
-            FROM node_stats
-            WHERE lat IS NOT NULL
-            ON CONFLICT (ip_address) DO NOTHING;
-        ''')
         
         conn.commit()
-        print("Database initialized. Geo Cache REBUILT with CLEAN IPs.")
+        print("System Foundation Initialized.")
     except Exception as e:
         print(f"Init DB Error: {e}")
     finally:
