@@ -12,7 +12,7 @@ def get_db_connection():
             conn = psycopg2.connect(DATABASE_URL)
             return conn
         except psycopg2.OperationalError:
-            print("⚠️ Database not ready... retrying in 2s")
+            print("Database not ready... retrying in 2s")
             time.sleep(2)
 
 def init_db():
@@ -61,10 +61,29 @@ def init_db():
         ''')
         
         cur.execute("CREATE INDEX IF NOT EXISTS idx_ip_timestamp ON node_stats (ip_address, timestamp DESC);")
+
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS geo_cache (
+                ip_address TEXT PRIMARY KEY,
+                lat FLOAT,
+                lon FLOAT,
+                country TEXT,
+                city TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        cur.execute('''
+            INSERT INTO geo_cache (ip_address, lat, lon, country, city)
+            SELECT DISTINCT ON (ip_address) ip_address, lat, lon, country, city
+            FROM node_stats
+            WHERE lat IS NOT NULL
+            ON CONFLICT (ip_address) DO NOTHING;
+        ''')
         
         conn.commit()
-        print("✅ Database initialized with LATEST schema.")
+        print("Database initialized with LATEST schema and Geo Cache pre-warmed.")
     except Exception as e:
-        print(f"❌ Init DB Error: {e}")
+        print(f"Init DB Error: {e}")
     finally:
         conn.close()
