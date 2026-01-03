@@ -1,6 +1,7 @@
 import requests
 import time
 import logging
+import random
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_ip_location(ip_address: str) -> Dict[str, Any]:
-    
+
     clean_ip = ip_address.split(':')[0]
     
     conn = get_db_connection()
@@ -156,13 +157,15 @@ def save_batch(nodes: List[Dict[str, Any]]):
         futures = {ex.submit(probe_deep_stats, n): n for n in nodes}
         for f in as_completed(futures): processed.append(f.result())
 
+    random.shuffle(processed)
+
     conn = get_db_connection()
     cursor = conn.cursor()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     saved_count = 0
     for n in processed:
-        geo = get_ip_location(n.get('address', '0.0.0.0'))
+        get_ip_location(n.get('address', '0.0.0.0'))
         uptime = n.get('uptime', 0)
         try:
             cursor.execute('''
@@ -180,7 +183,7 @@ def save_batch(nodes: List[Dict[str, Any]]):
                 uptime, n.get('last_seen_timestamp', 0),
                 n.get('is_public', False), n.get('rpc_active', False),
                 n.get('cpu_percent', 0.0), n.get('ram_used_bytes', 0),
-                geo['lat'], geo['lon'], geo['country'], geo['city'],
+                None, None, None, None,
                 n.get('rpc_port', 6000), n.get('packets_sent', 0), n.get('packets_received', 0),
                 n.get('ram_total_bytes', 0), uptime
             ))
