@@ -44,10 +44,10 @@ def ensure_geo_state(clean_ip: str):
         logger.warning(f"Geo Resolution Failed for {clean_ip}: {e}")
     
     conn.close()
-
+    
 
 def cleanup_old_data():
-    
+
     conn = get_db_connection()
     conn.autocommit = True
     try:
@@ -70,8 +70,7 @@ def capture_snapshot():
         """)
 
         r = cur.fetchone()
-
-
+        
         cur.execute(
             "INSERT INTO network_snapshots (total_nodes, online_nodes, total_storage_committed) VALUES (%s, %s, %s)", 
             (r[0] or 0, r[1] or 0, r[2] or 0)
@@ -84,7 +83,7 @@ def capture_snapshot():
 def fetch_network_state(seed_ip: str):
     url = f"http://{seed_ip}:{RPC_PORT}/rpc"
     try:
-
+        
         resp = requests.post(url, json={"jsonrpc": "2.0", "method": "get-pods-with-stats", "id": 1}, timeout=5)
        
         if resp.status_code == 200:
@@ -176,8 +175,7 @@ def start_monitor():
     
     while True:
         data_found = False
-
-
+        
         for seed in SEED_IPS:
             res = fetch_network_state(seed)
             if res:

@@ -70,7 +70,7 @@ def init_db():
                 total_storage_committed BIGINT
             )
         ''')
-        
+
         
         conn.commit()
         print("System Foundation Initialized.")
