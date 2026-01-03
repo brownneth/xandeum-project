@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, Server, Database, Globe, Clock, ChevronRight } from 'lucide-react';
+import { Activity, Server, Database, Globe, Clock } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
 import { NetworkHistoryChart } from '../components/charts/NetworkHistoryChart';
 import { WorldMap } from '../components/maps/WorldMap';
@@ -74,7 +74,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex-1 rounded-lg overflow-hidden border border-white/5 bg-[#0a0a0a]">
-            {/* Pass 'mapNodes' explicitly to the map component */}
+            {/* 3. CRITICAL FIX: Pass 'mapNodes' to the map */}
             <WorldMap mapNodes={mapNodes} isDark={isDark} />
           </div>
         </div>
@@ -119,4 +119,5 @@ const Dashboard = () => {
     </div>
   );
 };
+
 export default Dashboard;
