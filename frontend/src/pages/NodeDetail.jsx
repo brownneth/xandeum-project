@@ -10,7 +10,6 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
   const [copied, setCopied] = useState(false);
 
   if (!item) return null;
-  
 
   const isPrivate = item.node_type === 'Private Node' || !item.geo;
   const nodeTypeLabel = item.node_type || (isPrivate ? 'Private Node' : 'Public Node');
@@ -53,7 +52,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
 
   return (
     <div className="animate-fade-in flex flex-col h-full w-full mx-auto pb-12">
-
+      
 
       <div className="mb-6">
         <button 
@@ -93,7 +92,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                     <Clock size={12} className={isDark ? 'text-blue-400' : 'text-blue-600'} />
                     <span>Uptime: {formatUptime(item.uptime_seconds)}</span>
                 </div>
-
+                
                 <span className="w-1 h-1 rounded-full bg-gray-500 opacity-50"/>
                 <span>v{item.version}</span>
               </div>
@@ -200,7 +199,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                         </button>
                     )}
                 </div>
-
+                
                 <div className="flex-1 flex flex-col justify-center relative z-10">
                     {isPrivate ? (
                         <div className="flex flex-col items-center justify-center py-4 opacity-70">
@@ -254,7 +253,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
       ) : (
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
-
+          
            <div className={`${colors.card} border ${colors.border} p-6 rounded-lg`}>
               <div className="flex items-center gap-2 mb-6"><Server size={18} className={colors.accent} /><h3 className={`text-sm font-semibold uppercase tracking-wider ${colors.text}`}>System Information</h3></div>
               <div className="space-y-4 text-sm">
@@ -272,7 +271,7 @@ export const NodeDetail = ({ item, onBack, isDark, onViewOnMap }) => {
                    {item.os ? (<div className="flex justify-between py-2 border-b border-gray-800"><span className={colors.subText}>Operating System</span><span className={`font-mono ${colors.text}`}>{item.os}</span></div>) : (<div className="flex justify-between py-2 border-b border-gray-800"><span className={colors.subText}>Host System</span><span className={`font-mono text-xs italic ${colors.subText}`}>Not available</span></div>)}
               </div>
            </div>
-
+           
         </div>
       )}
 

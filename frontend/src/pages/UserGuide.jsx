@@ -14,7 +14,7 @@ export const UserGuide = ({ onBack, isDark }) => {
 
   return (
     <div className={`animate-fade-in w-full pb-20 ${theme.text}`}>
-      
+
       <div className="max-w-3xl mx-auto pt-8">
         <button onClick={onBack} className={`flex items-center gap-2 px-3 py-1.5 text-xs font-normal rounded-md transition-all border mb-8 ${isDark ? 'border-transparent hover:bg-[#353535] text-gray-400' : 'border-transparent hover:bg-gray-200 text-gray-600'}`}>
           <ArrowLeft size={14} /> Back to Dashboard
@@ -61,7 +61,7 @@ export const UserGuide = ({ onBack, isDark }) => {
               </div>
             </div>
           </section>
-
+          
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { formatStorage } from '../utils/formatters';
 
 export const useNetworkData = () => {
   const [nodes, setNodes] = useState([]);
-  const [mapNodes, setMapNodes] = useState([]); 
+  const [mapNodes, setMapNodes] = useState([]);
   const [stats, setStats] = useState({
     totalNodes: 0,
     onlineNodes: 0,
@@ -34,7 +34,7 @@ export const useNetworkData = () => {
 
       setHistory(historyData);
 
-     
+
       const formattedMapNodes = mapData.map((n, i) => ({
         id: `map-node-${i}`,
         ip: n.ip,
@@ -49,7 +49,7 @@ export const useNetworkData = () => {
     }
   };
 
-
+  
 
   const fetchNodes = useCallback(async (pageNum) => {
     try {

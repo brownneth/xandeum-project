@@ -28,7 +28,7 @@ export const NodeExplorer = ({ nodes, loadMore, hasMore, loading, isDark, onRowC
 
   return (
     <div className="animate-fade-in pb-12">
-
+      
       <div className="mb-4">
         <button 
           onClick={() => onNavigate('overview')}
@@ -107,7 +107,9 @@ export const NodeExplorer = ({ nodes, loadMore, hasMore, loading, isDark, onRowC
                 </td>
               </tr>
             ))}
-            
+            {filteredNodes.length === 0 && !loading && (
+               <tr><td colSpan="7" className="p-8 text-center opacity-50">No nodes found</td></tr>
+            )}
           </tbody>
         </table>
       </div>
