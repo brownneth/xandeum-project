@@ -103,7 +103,7 @@ def probe_deep_stats(node: Dict[str, Any]):
 
 
     try:
-
+        
         resp = requests.post(f"http://{ip}:{port}/rpc", json={"jsonrpc": "2.0", "method": "get-stats", "id": 1}, timeout=2)
         if resp.status_code == 200:
             res = resp.json().get('result', {})
@@ -114,7 +114,10 @@ def probe_deep_stats(node: Dict[str, Any]):
                 node['ram_total_bytes'] = res.get('ram_total', 0)
                 node['packets_sent'] = res.get('packets_sent', 0)
                 node['packets_received'] = res.get('packets_received', 0)
-    except: pass
+    except requests.exceptions.Timeout:
+        logger.warning(f"Timeout probing {ip}:{port}")
+    except Exception as e:
+        logger.warning(f"Failed to probe {ip}:{port} - {e}")
     return node
 
 def save_batch(nodes: List[Dict[str, Any]]):

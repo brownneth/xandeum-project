@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../services/api';
 import { formatStorage } from '../utils/formatters';
 
@@ -15,7 +15,8 @@ export const useNetworkData = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
+  
+  const isFetching = useRef(false);
 
   const fetchGlobalData = async () => {
     try {
@@ -46,12 +47,13 @@ export const useNetworkData = () => {
       console.warn("Failed to fetch global data", err);
     }
   };
-
+  
 
 
   const fetchNodes = useCallback(async (pageNum) => {
     try {
-      setLoading(true);
+      if (nodes.length === 0) setLoading(true);
+      
       const rawData = await api.getNodes(pageNum);
 
       if (!Array.isArray(rawData) || rawData.length === 0) {
@@ -80,10 +82,12 @@ export const useNetworkData = () => {
         };
       });
 
-
+      
 
 
       setNodes(prev => {
+        if (pageNum === 1) return newNodes;
+        
         const existingIds = new Set(prev.map(n => n.id));
         const uniqueNew = newNodes.filter(n => !existingIds.has(n.id));
         return [...prev, ...uniqueNew];
@@ -94,12 +98,29 @@ export const useNetworkData = () => {
     } finally {
       setLoading(false);
     }
+  }, []); 
+
+  useEffect(() => {
+    const init = async () => {
+        await fetchNodes(1);
+        await fetchGlobalData();
+    };
+    init();
   }, []);
 
   useEffect(() => {
-    fetchNodes(1);
-    fetchGlobalData(); 
-  }, [fetchNodes]);
+    const interval = setInterval(async () => {
+        if (isFetching.current) return;
+        isFetching.current = true;
+        await Promise.all([
+            fetchNodes(page), 
+            fetchGlobalData() 
+        ]);
+        isFetching.current = false;
+    }, 5000); 
+
+    return () => clearInterval(interval);
+  }, [page, fetchNodes]); 
 
   const loadMore = () => {
     if (!loading && hasMore) {
