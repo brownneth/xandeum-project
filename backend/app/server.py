@@ -4,13 +4,9 @@ from typing import List, Optional
 from psycopg2.extras import RealDictCursor
 from contextlib import asynccontextmanager
 
-
-
 from .database import get_db_connection
 from .utils import format_bytes
 from .models import NodeStatsResponse, NetworkStatsResponse
-
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,12 +29,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.head("/", tags=["Health"])
 @app.get("/", tags=["Health"])
 def health_check(): return {"status": "online", "service": "Xandeum API"}
 
 @app.get("/stats", response_model=NetworkStatsResponse, tags=["Stats"])
 def get_network_stats():
-
     conn = get_db_connection()
     try:
         cur = conn.cursor()
@@ -117,7 +113,6 @@ def get_nodes(
         
         params = []
         where_clauses = []
-
         if search:
             where_clauses.append("ns.ip_address LIKE %s")
             params.append(f"%{search}%")
@@ -137,7 +132,6 @@ def get_nodes(
     results = []
     for r in rows:
         is_public = bool(r['is_public']) or bool(r['rpc_active'])
-
         results.append({
             "ip_address": r['ip_address'] or "Unknown",
             "version": r['version'] or "unknown",
@@ -147,11 +141,9 @@ def get_nodes(
             "storage_committed_bytes": r['storage_committed_bytes'] or 0,
             "formatted_usage": format_bytes(r['storage_used_bytes']),
             "last_seen": str(r['timestamp']),
-
             "cpu_percent": r['cpu_percent'] or 0.0,
             "ram_used_bytes": r['ram_used_bytes'] or 0,
             "ram_total_bytes": r.get('ram_total_bytes', 0),
-
             "rpc_port": r.get('rpc_port', 6000),
             "packets_sent": r.get('packets_sent', 0),
             "packets_received": r.get('packets_received', 0),
@@ -159,10 +151,8 @@ def get_nodes(
             "lon": r.get('lon'),
             "country": r.get('country'),
             "city": r.get('city'),
-
             "uptime_seconds": r.get('uptime_seconds', 0)
         })
-        
     return results
 
 @app.get("/history", tags=["Stats"])
